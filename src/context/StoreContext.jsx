@@ -19,7 +19,7 @@ const INITIAL_PRODUCTS = [
     description: 'A premium-weight, ultra-soft cotton blend hoodie designed for the perfect streetwear drape. Features double-lined hood, kangaroo pocket, and minimal embroidered branding.',
     price: 1899,
     discountPrice: 1499,
-    image: '/images/clothing.jpg',
+    image: '/images/featured-hoodie.jpg',
     active: true,
     featured: true,
     trending: true,
@@ -90,7 +90,7 @@ const INITIAL_PRODUCTS = [
     description: 'Crafted from premium stretch denim with a mid-wash finish. Equipped with multiple utility cargo pockets, heavy-duty zipper fly, and elasticated hem adjusters for versatile styling.',
     price: 2499,
     discountPrice: 1999,
-    image: '/images/clothing.jpg',
+    image: '/images/cargo-jeans.jpg',
     active: true,
     featured: false,
     trending: true,
@@ -156,7 +156,7 @@ const INITIAL_PRODUCTS = [
     description: 'Water-resistant and windproof, this light outerwear piece features adjustable hood, waterproof zippers, and reflective utility details. Ideal for layering.',
     price: 3499,
     discountPrice: 2799,
-    image: '/images/clothing.jpg',
+    image: '/images/windbreaker.jpg',
     active: true,
     featured: true,
     trending: true,
@@ -491,6 +491,24 @@ export const StoreProvider = ({ children }) => {
   });
 
   const [isAdmin, setIsAdmin] = useState(false);
+
+  // Upgrade legacy placeholder images in local storage on startup
+  useEffect(() => {
+    setProducts((prev) =>
+      prev.map((p) => {
+        if (p.id === 'prod-1' && p.image === '/images/clothing.jpg') {
+          return { ...p, image: '/images/featured-hoodie.jpg' };
+        }
+        if (p.id === 'prod-3' && p.image === '/images/clothing.jpg') {
+          return { ...p, image: '/images/cargo-jeans.jpg' };
+        }
+        if (p.id === 'prod-5' && p.image === '/images/clothing.jpg') {
+          return { ...p, image: '/images/windbreaker.jpg' };
+        }
+        return p;
+      })
+    );
+  }, []);
 
   // Load initial data from backend API with fallback
   useEffect(() => {

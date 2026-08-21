@@ -341,9 +341,14 @@ export const Storefront = () => {
       {/* HEADER MAIN ROW */}
       <header className="header-main">
         <div className="container header-main-container">
-          <a href="#" className="logo-link" onClick={() => { setActiveView('home'); setActiveCategory('all'); setSelectedProduct(null); }}>
-            Magnet<span className="logo-dot"></span>
-          </a>
+          <h1 className="logo-h1-wrap" style={{ margin: 0, display: 'flex', alignItems: 'center' }}>
+            <a href="#" className="logo-link" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', textDecoration: 'none' }} onClick={() => { setActiveView('home'); setActiveCategory('all'); setSelectedProduct(null); }}>
+              <img src="/logo.jpg" alt="Magnet Boutique Logo" style={{ height: '42px', width: '42px', objectFit: 'cover', borderRadius: '50%', border: '2px solid var(--color-primary)', boxShadow: '0 2px 10px rgba(239, 68, 68, 0.2)' }} />
+              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '1.45rem', color: 'var(--text-primary)', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center' }}>
+                Magnet<span style={{ color: 'var(--color-primary)' }}>.</span>
+              </span>
+            </a>
+          </h1>
 
           {/* Large Center Search Bar */}
           <div className="header-search-bar">
@@ -2092,7 +2097,7 @@ export const Storefront = () => {
           {/* SHOP BY CATEGORY CIRCLES STRIP */}
           <section style={{ padding: '1rem 0' }}>
             <div className="container">
-              <h3 style={{ textTransform: 'uppercase', fontSize: '0.85rem', color: 'var(--text-muted)', letterSpacing: '0.05em', textAlign: 'center' }}>Shop By Category</h3>
+              <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.02em', textAlign: 'center' }}>Shop by Category</h3>
               <div className="category-circle-grid">
                 {categories.filter(c => c.active).map(cat => {
                   const count = products.filter(p => p.category === cat.id && p.active).length;
@@ -2120,43 +2125,54 @@ export const Storefront = () => {
             <div className="container">
               <div className="deals-container">
                 {/* Deal of the Day main card */}
-                <div className="deal-banner">
-                  <span className="deal-badge"><Percent size={12} /> Deal of the Day</span>
-                  <h2 style={{ fontSize: '2rem', lineHeight: '1.2' }}>GaN Fast Charger Adapter</h2>
-                  <p style={{ opacity: 0.9 }}>Ultra-efficient 65W GaN fast wall charger at a historic low price. Limited quantity available!</p>
-                  
-                  <div style={{ display: 'flex', gap: '2rem', margin: '0.5rem 0' }}>
-                    <div>
-                      <span style={{ fontSize: '0.85rem', opacity: 0.8 }}>Deal Price</span>
-                      <h3 style={{ fontSize: '1.5rem', fontWeight: 800 }}>₹1699 <span style={{ textDecoration: 'line-through', fontSize: '1.1rem', opacity: 0.7 }}>₹2199</span></h3>
+                <div className="deal-banner" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <span className="deal-badge"><Percent size={12} /> Deal of the Day</span>
+                    <h2 style={{ fontSize: '2rem', lineHeight: '1.2' }}>GaN Fast Charger Adapter</h2>
+                    <p style={{ opacity: 0.9 }}>Ultra-efficient 65W GaN fast wall charger at a historic low price. Limited quantity available!</p>
+                    
+                    <div style={{ display: 'flex', gap: '2rem', margin: '0.5rem 0' }}>
+                      <div>
+                        <span style={{ fontSize: '0.85rem', opacity: 0.8 }}>Deal Price</span>
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: 800 }}>₹1699 <span style={{ textDecoration: 'line-through', fontSize: '1.1rem', opacity: 0.7 }}>₹2199</span></h3>
+                      </div>
+                      <div>
+                        <span style={{ fontSize: '0.85rem', opacity: 0.8 }}>Stocks Left</span>
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Only 8 items</h3>
+                      </div>
                     </div>
-                    <div>
-                      <span style={{ fontSize: '0.85rem', opacity: 0.8 }}>Stocks Left</span>
-                      <h3 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Only 8 items</h3>
-                    </div>
-                  </div>
 
-                  <button className="btn btn-primary" style={{ background: '#ffffff', color: '#10141f', width: 'fit-content' }} onClick={() => {
-                    const prod = products.find(p => p.id === 'prod-7');
-                    if (prod) handleProductClick(prod);
-                  }}>
-                    Grab Deal
-                  </button>
+                    <button className="btn btn-primary" style={{ background: '#ffffff', color: '#10141f', width: 'fit-content', padding: '0.85rem 2.25rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', boxShadow: '0 4px 15px rgba(255,255,255,0.2)' }} onClick={() => {
+                      const prod = products.find(p => p.id === 'prod-7');
+                      if (prod) handleProductClick(prod);
+                    }}>
+                      Grab Deal
+                    </button>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'center' }} className="deal-image-wrapper">
+                    <img 
+                      src="/images/accessories.jpg" 
+                      alt="GaN Fast Charger Adapter" 
+                      style={{ width: '100%', maxWidth: '280px', height: '220px', objectFit: 'cover', borderRadius: 'var(--radius-md)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }} 
+                    />
+                  </div>
                 </div>
 
                 {/* Right Quick Deal Product */}
                 <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', justifyContent: 'center' }}>
                   <span className="deal-badge" style={{ backgroundColor: 'var(--color-discount)' }}>Featured</span>
-                  <img src="/images/clothing.jpg" alt="Deal apparel" style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
+                  <img src="/images/featured-hoodie.jpg" alt="Magnet Signature Hoodie" style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
                   <h4 style={{ fontSize: '1rem', lineHeight: 1.3 }}>Magnet Signature Hoodie</h4>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>₹1499 <span style={{ textDecoration: 'line-through', fontSize: '0.85rem', color: 'var(--text-muted)' }}>₹1899</span></span>
-                    <span style={{ color: 'var(--color-discount)', fontSize: '0.85rem', fontWeight: 700 }}>21% OFF</span>
+                  <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 900, fontSize: '1.25rem', color: 'var(--text-primary)' }}>₹1499</span>
+                    <span style={{ textDecoration: 'line-through', fontSize: '0.85rem', color: 'var(--text-muted)', marginLeft: '0.25rem' }}>₹1899</span>
+                    <span style={{ color: 'var(--color-discount)', fontSize: '0.85rem', fontWeight: 700, backgroundColor: 'var(--color-primary-light)', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm)' }}>21% OFF</span>
                   </div>
-                  <button className="card-btn" style={{ margin: 0 }} onClick={() => {
+                  <button className="card-cta-btn" style={{ margin: 0 }} onClick={(e) => {
+                    e.stopPropagation();
                     const prod = products.find(p => p.id === 'prod-1');
-                    if (prod) handleProductClick(prod);
-                  }}>View Details</button>
+                    if (prod) handleQuickAdd(prod, e);
+                  }}>Add to Cart</button>
                 </div>
               </div>
             </div>
@@ -2221,7 +2237,7 @@ export const Storefront = () => {
                   <h2 className="section-title">Clothing & Streetwear</h2>
                   <p className="section-subtitle">240 GSM drop shoulder tees, cargo pants, and hoodies</p>
                 </div>
-                <button className="nav-link" onClick={() => { setActiveView('shop'); setActiveCategory('clothing'); }}>See All &rarr;</button>
+                <button className="nav-link" onClick={() => { setActiveView('shop'); setActiveCategory('clothing'); }}>View All &rarr;</button>
               </div>
 
               <div className="product-grid">
@@ -2271,7 +2287,7 @@ export const Storefront = () => {
                   <h2 className="section-title">Premium Accessories & Tech</h2>
                   <p className="section-subtitle">Impact iPhone cases, GaN fast wall adapters, and sleek tech organizers</p>
                 </div>
-                <button className="nav-link" onClick={() => { setActiveView('shop'); setActiveCategory('accessories'); }}>See All &rarr;</button>
+                <button className="nav-link" onClick={() => { setActiveView('shop'); setActiveCategory('accessories'); }}>View All &rarr;</button>
               </div>
 
               <div className="product-grid">
@@ -2318,7 +2334,7 @@ export const Storefront = () => {
           <section style={{ padding: '3.5rem 0', background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', color: '#ffffff', borderRadius: 'var(--radius-lg)', margin: '2rem 1.25rem', overflow: 'hidden' }}>
             <div className="container" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '3rem', flexWrap: 'wrap' }}>
               <div style={{ flex: '1 1 450px', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-primary)', letterSpacing: '0.1em' }}>New Season Lookbook</span>
+                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--color-primary)', letterSpacing: '0.04em' }}>New Season Lookbook</span>
                 <h2 style={{ fontSize: '2.5rem', fontWeight: 900, lineHeight: 1.15, fontFamily: 'var(--font-display)', margin: 0 }}>Elevate Your Everyday Vibe</h2>
                 <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: 1.6 }}>
                   Our latest drops blend heavy-duty tech security with raw streetwear aesthetics. Made for those who navigate the urban landscape of Vapi and beyond with style and confidence.
@@ -2349,28 +2365,28 @@ export const Storefront = () => {
                   <div style={{ color: 'var(--color-primary)', padding: '0.75rem', background: 'var(--color-primary-light)', borderRadius: '50%' }}>
                     <ShieldCheck size={28} />
                   </div>
-                  <h4 style={{ fontSize: '0.95rem' }}>Secure COD Purchases</h4>
+                  <h3 style={{ fontSize: '0.95rem', margin: 0, fontWeight: 700 }}>Secure COD Purchases</h3>
                   <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Pay cash only when products are safely inspected at door.</p>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                   <div style={{ color: 'var(--color-primary)', padding: '0.75rem', background: 'var(--color-primary-light)', borderRadius: '50%' }}>
                     <RefreshCw size={28} />
                   </div>
-                  <h4 style={{ fontSize: '0.95rem' }}>7-Day Replacements</h4>
+                  <h3 style={{ fontSize: '0.95rem', margin: 0, fontWeight: 700 }}>7-Day Replacements</h3>
                   <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Hassle-free replacement for sizing problems or product issues.</p>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                   <div style={{ color: 'var(--color-primary)', padding: '0.75rem', background: 'var(--color-primary-light)', borderRadius: '50%' }}>
                     <Truck size={28} />
                   </div>
-                  <h4 style={{ fontSize: '0.95rem' }}>Fast Regional Shipping</h4>
+                  <h3 style={{ fontSize: '0.95rem', margin: 0, fontWeight: 700 }}>Fast Regional Shipping</h3>
                   <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Express delivery to Vapi, Surat, and Mumbai regions in 24-48 hours.</p>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                   <div style={{ color: 'var(--color-primary)', padding: '0.75rem', background: 'var(--color-primary-light)', borderRadius: '50%' }}>
                     <Phone size={28} />
                   </div>
-                  <h4 style={{ fontSize: '0.95rem' }}>Direct WhatsApp Help</h4>
+                  <h3 style={{ fontSize: '0.95rem', margin: 0, fontWeight: 700 }}>Direct WhatsApp Help</h3>
                   <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Talk to the retail store staff directly for any customized query.</p>
                 </div>
               </div>
@@ -2448,72 +2464,73 @@ export const Storefront = () => {
 
               </div>
 
-              {/* Centered App Download Section */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', padding: '1.5rem 0', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)', marginBottom: '2rem' }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-secondary)', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                  📱 EXPERIENCE THE MAGNET APP
-                </span>
-                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                  
-                  {/* Google Play Button */}
-                  <a href="#" className="app-badge-btn" onClick={(e) => { e.preventDefault(); alert('Magnet Mobile App is coming soon!'); }}>
-                    <svg viewBox="0 0 24 24" className="app-badge-icon" fill="currentColor">
-                      <path d="M17.5 18H6.5c-1.38 0-2.5-1.12-2.5-2.5V8.5C4 7.12 5.12 6 6.5 6h11c1.38 0 2.5 1.12 2.5 2.5v7c0 1.38-1.12 2.5-2.5 2.5zM6.5 7C5.67 7 5 7.67 5 8.5v7c0 .83.67 1.5 1.5 1.5h11c.83 0 1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5h-11z" opacity="0.3"/>
-                      <path d="M12.5 12l-6-4.5v9l6-4.5z" fill="#00e676"/>
-                      <path d="M18.5 12l-6-4.5v9l6-4.5z" fill="#00b0ff"/>
-                    </svg>
-                    <div className="app-badge-text">
-                      <span className="app-badge-subtitle">GET IT ON</span>
-                      <span className="app-badge-title">Google Play</span>
-                    </div>
-                  </a>
+              {/* Responsive App Download & Follow Us Subrow */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '2rem', flexWrap: 'wrap', padding: '1.5rem 0', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)', marginBottom: '2rem' }}>
+                {/* App Download Section */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-secondary)', letterSpacing: '0.05em' }}>
+                    📱 EXPERIENCE THE MAGNET APP
+                  </span>
+                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                    {/* Google Play Button */}
+                    <a href="#" className="app-badge-btn" onClick={(e) => { e.preventDefault(); alert('Magnet Mobile App is coming soon!'); }}>
+                      <svg viewBox="0 0 24 24" className="app-badge-icon" fill="currentColor">
+                        <path d="M17.5 18H6.5c-1.38 0-2.5-1.12-2.5-2.5V8.5C4 7.12 5.12 6 6.5 6h11c1.38 0 2.5 1.12 2.5 2.5v7c0 1.38-1.12 2.5-2.5 2.5zM6.5 7C5.67 7 5 7.67 5 8.5v7c0 .83.67 1.5 1.5 1.5h11c.83 0 1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5h-11z" opacity="0.3"/>
+                        <path d="M12.5 12l-6-4.5v9l6-4.5z" fill="#00e676"/>
+                        <path d="M18.5 12l-6-4.5v9l6-4.5z" fill="#00b0ff"/>
+                      </svg>
+                      <div className="app-badge-text">
+                        <span className="app-badge-subtitle">GET IT ON</span>
+                        <span className="app-badge-title">Google Play</span>
+                      </div>
+                    </a>
 
-                  {/* App Store Button */}
-                  <a href="#" className="app-badge-btn" onClick={(e) => { e.preventDefault(); alert('Magnet Mobile App is coming soon!'); }}>
-                    <svg viewBox="0 0 24 24" className="app-badge-icon" fill="currentColor">
-                      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-.1 3.81.47 1.25.5 2.23 1.48 2.76 2.65-2.58 1.55-2.17 4.9.46 5.96-.8 2.01-1.63 3.99-3.43 3.67zM15.97 4.17c.84-1.02 1.41-2.4 1.25-3.77-1.17.05-2.59.78-3.43 1.77-.76.88-1.42 2.28-1.24 3.63 1.3.1 2.62-.64 3.42-1.63z" />
-                    </svg>
-                    <div className="app-badge-text">
-                      <span className="app-badge-subtitle">Download on the</span>
-                      <span className="app-badge-title">App Store</span>
-                    </div>
-                  </a>
-
+                    {/* App Store Button */}
+                    <a href="#" className="app-badge-btn" onClick={(e) => { e.preventDefault(); alert('Magnet Mobile App is coming soon!'); }}>
+                      <svg viewBox="0 0 24 24" className="app-badge-icon" fill="currentColor">
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-.1 3.81.47 1.25.5 2.23 1.48 2.76 2.65-2.58 1.55-2.17 4.9.46 5.96-.8 2.01-1.63 3.99-3.43 3.67zM15.97 4.17c.84-1.02 1.41-2.4 1.25-3.77-1.17.05-2.59.78-3.43 1.77-.76.88-1.42 2.28-1.24 3.63 1.3.1 2.62-.64 3.42-1.63z" />
+                      </svg>
+                      <div className="app-badge-text">
+                        <span className="app-badge-subtitle">Download on the</span>
+                        <span className="app-badge-title">App Store</span>
+                      </div>
+                    </a>
+                  </div>
                 </div>
-              </div>
 
-              {/* Social links row */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Follow Us:</span>
-                <div style={{ display: 'flex', gap: '0.65rem' }}>
-                  <a href="#" className="social-circle-btn facebook" style={{ backgroundColor: '#3b5998' }}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px' }}>
-                      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                    </svg>
-                  </a>
-                  <a href="https://www.instagram.com/magnet_vapi_officialll/" target="_blank" rel="noopener noreferrer" className="social-circle-btn instagram" style={{ backgroundColor: '#c13584' }}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px' }}>
-                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                    </svg>
-                  </a>
-                  <a href="#" className="social-circle-btn snapchat" style={{ backgroundColor: '#fffc00' }}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px' }}>
-                      <path d="M12 2a9 9 0 0 0-9 9c0 1.5.5 2.5 1 3.5.5.8.5 1.5 0 2.2a2 2 0 0 1-1 1c-1 .2-1.5.7-1 1.8.3.8 1 1.5 2.5 1.5.8 0 1.5.5 2.2 1a8.38 8.38 0 0 0 3.8.9c3 0 5-1.5 5.5-3 .5-.8 1-1 1.8-1 1.5 0 2.2-.7 2.5-1.5.5-1.1 0-1.6-1-1.8a2 2 0 0 1-1-1c-.5-.7-.5-1.4 0-2.2.5-1 1-2 1-3.5a9 9 0 0 0-9-9z"></path>
-                    </svg>
-                  </a>
-                  <a href="#" className="social-circle-btn twitter" style={{ backgroundColor: '#000000' }}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '14px', height: '14px' }}>
-                      <path d="M4 4l11.733 16h4.267l-11.733 -16z" />
-                      <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
-                    </svg>
-                  </a>
+                {/* Follow Us Section */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Follow Us:</span>
+                  <div style={{ display: 'flex', gap: '0.65rem' }}>
+                    <a href="#" className="social-circle-btn facebook" style={{ backgroundColor: '#3b5998' }}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px' }}>
+                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                      </svg>
+                    </a>
+                    <a href="https://www.instagram.com/magnet_vapi_officialll/" target="_blank" rel="noopener noreferrer" className="social-circle-btn instagram" style={{ backgroundColor: '#c13584' }}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px' }}>
+                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                      </svg>
+                    </a>
+                    <a href="#" className="social-circle-btn snapchat" style={{ backgroundColor: '#fffc00' }}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px' }}>
+                        <path d="M12 2a9 9 0 0 0-9 9c0 1.5.5 2.5 1 3.5.5.8.5 1.5 0 2.2a2 2 0 0 1-1 1c-1 .2-1.5.7-1 1.8.3.8 1 1.5 2.5 1.5.8 0 1.5.5 2.2 1a8.38 8.38 0 0 0 3.8.9c3 0 5-1.5 5.5-3 .5-.8 1-1 1.8-1 1.5 0 2.2-.7 2.5-1.5.5-1.1 0-1.6-1-1.8a2 2 0 0 1-1-1c-.5-.7-.5-1.4 0-2.2.5-1 1-2 1-3.5a9 9 0 0 0-9-9z"></path>
+                      </svg>
+                    </a>
+                    <a href="#" className="social-circle-btn twitter" style={{ backgroundColor: '#000000' }}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '14px', height: '14px' }}>
+                        <path d="M4 4l11.733 16h4.267l-11.733 -16z" />
+                        <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
+                      </svg>
+                    </a>
+                  </div>
                 </div>
               </div>
 
               {/* Who We Are Accordion Block */}
-              <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+              <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', overflow: 'hidden', width: 'fit-content', minWidth: '280px' }}>
                 <button 
                   onClick={() => setWhoWeAreOpen(!whoWeAreOpen)}
                   style={{ 
@@ -2521,6 +2538,7 @@ export const Storefront = () => {
                     display: 'flex', 
                     justifyContent: 'space-between', 
                     alignItems: 'center', 
+                    gap: '2.5rem',
                     padding: '1rem 1.5rem', 
                     backgroundColor: 'var(--bg-input)', 
                     color: '#ef4444', 

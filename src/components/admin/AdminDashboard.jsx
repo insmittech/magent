@@ -259,9 +259,12 @@ export const AdminDashboard = () => {
       {/* Header */}
       <header className="header-main">
         <div className="container header-main-container">
-          <a href="#" className="logo-link" onClick={() => setIsAdmin(false)}>
-            Magnet<span className="logo-dot" style={{ backgroundColor: '#2563eb' }}></span>
-            <span style={{ fontSize: '0.8rem', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm)', background: 'var(--bg-input)', color: 'var(--text-secondary)' }}>Admin Panel</span>
+          <a href="#" className="logo-link" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', textDecoration: 'none' }} onClick={() => setIsAdmin(false)}>
+            <img src="/logo.jpg" alt="Magnet Boutique Logo" style={{ height: '42px', width: '42px', objectFit: 'cover', borderRadius: '50%', border: '2px solid #2563eb', boxShadow: '0 2px 10px rgba(37, 99, 235, 0.2)' }} />
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '1.45rem', color: 'var(--text-primary)', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              Magnet<span style={{ color: '#2563eb' }}>.</span>
+              <span style={{ fontSize: '0.8rem', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm)', background: 'var(--bg-input)', color: 'var(--text-secondary)', fontWeight: 600 }}>Admin Panel</span>
+            </span>
           </a>
           
           {/* Spacer center column */}
