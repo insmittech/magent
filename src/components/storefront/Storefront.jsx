@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { StoreContext } from '../../context/StoreContext';
 import { 
   ShoppingBag, Search, X, Plus, Minus, Check, ArrowRight, Phone, 
@@ -29,6 +29,17 @@ export const Storefront = () => {
     placeOrder,
     setIsAdmin 
   } = useContext(StoreContext);
+
+  const trendingSliderRef = useRef(null);
+  const clothingSliderRef = useRef(null);
+  const accessoriesSliderRef = useRef(null);
+
+  const handleScroll = (ref, direction) => {
+    if (ref.current) {
+      const scrollAmount = direction === 'left' ? -300 : 300;
+      ref.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   // Active view routing: 'home' | 'shop' | 'account' | 'wishlist'
   const [activeView, setActiveView] = useState('home');
@@ -2189,42 +2200,50 @@ export const Storefront = () => {
                 <button className="nav-link" onClick={() => { setActiveView('shop'); setActiveCategory('all'); }}>View All &rarr;</button>
               </div>
 
-              <div className="product-grid">
-                {products.filter(p => p.trending).slice(0, 4).map(product => {
-                  const isDiscounted = !!product.discountPrice;
-                  const discountPct = isDiscounted ? Math.round(((product.price - product.discountPrice) / product.price) * 100) : 0;
-                  const inWishlist = wishlist.some(w => w.id === product.id);
+              <div className="product-slider-container">
+                <button className="product-slider-btn left" onClick={(e) => { e.stopPropagation(); handleScroll(trendingSliderRef, 'left'); }} aria-label="Slide Left">
+                  <ChevronLeft size={20} />
+                </button>
+                <div className="product-slider-track" ref={trendingSliderRef}>
+                  {products.filter(p => p.trending).map(product => {
+                    const isDiscounted = !!product.discountPrice;
+                    const discountPct = isDiscounted ? Math.round(((product.price - product.discountPrice) / product.price) * 100) : 0;
+                    const inWishlist = wishlist.some(w => w.id === product.id);
 
-                  return (
-                    <div key={product.id} className="product-card" onClick={() => handleProductClick(product)}>
-                      <div className="card-image-box">
-                        <img src={product.image} alt={product.name} className="card-image-main" />
-                        <button 
-                          className={`card-wishlist-btn ${inWishlist ? 'active' : ''}`}
-                          onClick={(e) => { e.stopPropagation(); toggleWishlist(product); }}
-                        >
-                          <Heart size={16} fill={inWishlist ? 'currentColor' : 'none'} />
-                        </button>
-                        {isDiscounted && <span className="badge-tag discount">-{discountPct}%</span>}
-                      </div>
-                      <div className="card-info-box">
-                        <span className="card-brand-label">{product.brand || 'Magnet'}</span>
-                        <h3 className="card-title-label">{product.name}</h3>
-                        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                          <span className="rating-badge">{product.rating} ★</span>
-                          <span className="reviews-count">({product.reviewsCount})</span>
+                    return (
+                      <div key={product.id} className="product-card" onClick={() => handleProductClick(product)}>
+                        <div className="card-image-box">
+                          <img src={product.image} alt={product.name} className="card-image-main" />
+                          <button 
+                            className={`card-wishlist-btn ${inWishlist ? 'active' : ''}`}
+                            onClick={(e) => { e.stopPropagation(); toggleWishlist(product); }}
+                          >
+                            <Heart size={16} fill={inWishlist ? 'currentColor' : 'none'} />
+                          </button>
+                          {isDiscounted && <span className="badge-tag discount">-{discountPct}%</span>}
                         </div>
-                        <div className="card-price-container">
-                          <span className="price">₹{product.discountPrice || product.price}</span>
-                          {isDiscounted && <span className="original-price">₹{product.price}</span>}
+                        <div className="card-info-box">
+                          <span className="card-brand-label">{product.brand || 'Magnet'}</span>
+                          <h3 className="card-title-label">{product.name}</h3>
+                          <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                            <span className="rating-badge">{product.rating} ★</span>
+                            <span className="reviews-count">({product.reviewsCount})</span>
+                          </div>
+                          <div className="card-price-container">
+                            <span className="price">₹{product.discountPrice || product.price}</span>
+                            {isDiscounted && <span className="original-price">₹{product.price}</span>}
+                          </div>
+                          <button className="card-cta-btn" onClick={(e) => { e.stopPropagation(); handleQuickAdd(product, e); }}>
+                            Add to Cart
+                          </button>
                         </div>
-                        <button className="card-cta-btn" onClick={(e) => { e.stopPropagation(); handleQuickAdd(product, e); }}>
-                          Add to Cart
-                        </button>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+                <button className="product-slider-btn right" onClick={(e) => { e.stopPropagation(); handleScroll(trendingSliderRef, 'right'); }} aria-label="Slide Right">
+                  <ChevronRight size={20} />
+                </button>
               </div>
             </div>
           </section>
@@ -2240,41 +2259,50 @@ export const Storefront = () => {
                 <button className="nav-link" onClick={() => { setActiveView('shop'); setActiveCategory('clothing'); }}>View All &rarr;</button>
               </div>
 
-              <div className="product-grid">
-                {products.filter(p => p.category === 'clothing').slice(0, 4).map(product => {
-                  const isDiscounted = !!product.discountPrice;
-                  const discountPct = isDiscounted ? Math.round(((product.price - product.discountPrice) / product.price) * 100) : 0;
-                  const inWishlist = wishlist.some(w => w.id === product.id);
+              <div className="product-slider-container">
+                <button className="product-slider-btn left" onClick={(e) => { e.stopPropagation(); handleScroll(clothingSliderRef, 'left'); }} aria-label="Slide Left">
+                  <ChevronLeft size={20} />
+                </button>
+                <div className="product-slider-track" ref={clothingSliderRef}>
+                  {products.filter(p => p.category === 'clothing').map(product => {
+                    const isDiscounted = !!product.discountPrice;
+                    const discountPct = isDiscounted ? Math.round(((product.price - product.discountPrice) / product.price) * 100) : 0;
+                    const inWishlist = wishlist.some(w => w.id === product.id);
 
-                  return (
-                    <div key={product.id} className="product-card" onClick={() => handleProductClick(product)}>
-                      <div className="card-image-box">
-                        <img src={product.image} alt={product.name} className="card-image-main" />
-                        <button 
-                          className={`card-wishlist-btn ${inWishlist ? 'active' : ''}`}
-                          onClick={(e) => { e.stopPropagation(); toggleWishlist(product); }}
-                        >
-                          <Heart size={16} fill={inWishlist ? 'currentColor' : 'none'} />
-                        </button>
-                      </div>
-                      <div className="card-info-box">
-                        <span className="card-brand-label">{product.brand || 'Magnet'}</span>
-                        <h3 className="card-title-label">{product.name}</h3>
-                        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                          <span className="rating-badge">{product.rating} ★</span>
-                          <span className="reviews-count">({product.reviewsCount})</span>
+                    return (
+                      <div key={product.id} className="product-card" onClick={() => handleProductClick(product)}>
+                        <div className="card-image-box">
+                          <img src={product.image} alt={product.name} className="card-image-main" />
+                          <button 
+                            className={`card-wishlist-btn ${inWishlist ? 'active' : ''}`}
+                            onClick={(e) => { e.stopPropagation(); toggleWishlist(product); }}
+                          >
+                            <Heart size={16} fill={inWishlist ? 'currentColor' : 'none'} />
+                          </button>
+                          {isDiscounted && <span className="badge-tag discount">-{discountPct}%</span>}
                         </div>
-                        <div className="card-price-container">
-                          <span className="price">₹{product.discountPrice || product.price}</span>
-                          {isDiscounted && <span className="original-price">₹{product.price}</span>}
+                        <div className="card-info-box">
+                          <span className="card-brand-label">{product.brand || 'Magnet'}</span>
+                          <h3 className="card-title-label">{product.name}</h3>
+                          <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                            <span className="rating-badge">{product.rating} ★</span>
+                            <span className="reviews-count">({product.reviewsCount})</span>
+                          </div>
+                          <div className="card-price-container">
+                            <span className="price">₹{product.discountPrice || product.price}</span>
+                            {isDiscounted && <span className="original-price">₹{product.price}</span>}
+                          </div>
+                          <button className="card-cta-btn" onClick={(e) => { e.stopPropagation(); handleQuickAdd(product, e); }}>
+                            Add to Cart
+                          </button>
                         </div>
-                        <button className="card-cta-btn" onClick={(e) => { e.stopPropagation(); handleQuickAdd(product, e); }}>
-                          Add to Cart
-                        </button>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+                <button className="product-slider-btn right" onClick={(e) => { e.stopPropagation(); handleScroll(clothingSliderRef, 'right'); }} aria-label="Slide Right">
+                  <ChevronRight size={20} />
+                </button>
               </div>
             </div>
           </section>
@@ -2290,42 +2318,50 @@ export const Storefront = () => {
                 <button className="nav-link" onClick={() => { setActiveView('shop'); setActiveCategory('accessories'); }}>View All &rarr;</button>
               </div>
 
-              <div className="product-grid">
-                {products.filter(p => p.category === 'accessories').slice(0, 4).map(product => {
-                  const isDiscounted = !!product.discountPrice;
-                  const discountPct = isDiscounted ? Math.round(((product.price - product.discountPrice) / product.price) * 100) : 0;
-                  const inWishlist = wishlist.some(w => w.id === product.id);
+              <div className="product-slider-container">
+                <button className="product-slider-btn left" onClick={(e) => { e.stopPropagation(); handleScroll(accessoriesSliderRef, 'left'); }} aria-label="Slide Left">
+                  <ChevronLeft size={20} />
+                </button>
+                <div className="product-slider-track" ref={accessoriesSliderRef}>
+                  {products.filter(p => p.category === 'accessories').map(product => {
+                    const isDiscounted = !!product.discountPrice;
+                    const discountPct = isDiscounted ? Math.round(((product.price - product.discountPrice) / product.price) * 100) : 0;
+                    const inWishlist = wishlist.some(w => w.id === product.id);
 
-                  return (
-                    <div key={product.id} className="product-card" onClick={() => handleProductClick(product)}>
-                      <div className="card-image-box">
-                        <img src={product.image} alt={product.name} className="card-image-main" />
-                        <button 
-                          className={`card-wishlist-btn ${inWishlist ? 'active' : ''}`}
-                          onClick={(e) => { e.stopPropagation(); toggleWishlist(product); }}
-                        >
-                          <Heart size={16} fill={inWishlist ? 'currentColor' : 'none'} />
-                        </button>
-                        {isDiscounted && <span className="badge-tag discount">-{discountPct}%</span>}
-                      </div>
-                      <div className="card-info-box">
-                        <span className="card-brand-label">{product.brand || 'Magnet'}</span>
-                        <h3 className="card-title-label">{product.name}</h3>
-                        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                          <span className="rating-badge">{product.rating} ★</span>
-                          <span className="reviews-count">({product.reviewsCount})</span>
+                    return (
+                      <div key={product.id} className="product-card" onClick={() => handleProductClick(product)}>
+                        <div className="card-image-box">
+                          <img src={product.image} alt={product.name} className="card-image-main" />
+                          <button 
+                            className={`card-wishlist-btn ${inWishlist ? 'active' : ''}`}
+                            onClick={(e) => { e.stopPropagation(); toggleWishlist(product); }}
+                          >
+                            <Heart size={16} fill={inWishlist ? 'currentColor' : 'none'} />
+                          </button>
+                          {isDiscounted && <span className="badge-tag discount">-{discountPct}%</span>}
                         </div>
-                        <div className="card-price-container">
-                          <span className="price">₹{product.discountPrice || product.price}</span>
-                          {isDiscounted && <span className="original-price">₹{product.price}</span>}
+                        <div className="card-info-box">
+                          <span className="card-brand-label">{product.brand || 'Magnet'}</span>
+                          <h3 className="card-title-label">{product.name}</h3>
+                          <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                            <span className="rating-badge">{product.rating} ★</span>
+                            <span className="reviews-count">({product.reviewsCount})</span>
+                          </div>
+                          <div className="card-price-container">
+                            <span className="price">₹{product.discountPrice || product.price}</span>
+                            {isDiscounted && <span className="original-price">₹{product.price}</span>}
+                          </div>
+                          <button className="card-cta-btn" onClick={(e) => { e.stopPropagation(); handleQuickAdd(product, e); }}>
+                            Add to Cart
+                          </button>
                         </div>
-                        <button className="card-cta-btn" onClick={(e) => { e.stopPropagation(); handleQuickAdd(product, e); }}>
-                          Add to Cart
-                        </button>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+                <button className="product-slider-btn right" onClick={(e) => { e.stopPropagation(); handleScroll(accessoriesSliderRef, 'right'); }} aria-label="Slide Right">
+                  <ChevronRight size={20} />
+                </button>
               </div>
             </div>
           </section>

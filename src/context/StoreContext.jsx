@@ -334,6 +334,312 @@ const INITIAL_PRODUCTS = [
     ],
     seoTitle: 'MagSafe Leather Card Wallet - Top-grain iPhone Accessory',
     seoDescription: 'Snaps magnetically onto your iPhone. Real leather credit card holder with RFID shielding.'
+  },
+  {
+    id: 'prod-11',
+    name: 'Heavyweight Utility Cargo Pants',
+    brand: 'Magnet Wear',
+    slug: 'heavyweight-utility-cargo-pants',
+    sku: 'CL-PT-011',
+    category: 'clothing',
+    description: 'Made from high-density tactical cotton canvas. Features six utility pockets, double-layer reinforced knees, and adjustable ankle cuffs for customizable style.',
+    price: 2999,
+    discountPrice: 2299,
+    image: '/images/clothing.jpg',
+    active: true,
+    featured: true,
+    trending: true,
+    bestseller: false,
+    newArrival: true,
+    rating: 4.7,
+    reviewsCount: 45,
+    variants: [
+      { id: 'v40', size: '30', color: 'Olive Green', stock: 5 },
+      { id: 'v41', size: '32', color: 'Olive Green', stock: 12 },
+      { id: 'v42', size: '34', color: 'Olive Green', stock: 8 },
+      { id: 'v43', size: '32', color: 'Black', stock: 10 }
+    ],
+    specifications: [
+      { key: 'Material', value: '100% Cotton Tactical Canvas' },
+      { key: 'Weight', value: '320 GSM' },
+      { key: 'Features', value: 'Adjustable drawcords, reinforced seat & knees' }
+    ],
+    seoTitle: 'Heavyweight Utility Cargo Pants - Tactical Streetwear',
+    seoDescription: 'Premium heavyweight cargo pants with six pocket layout and knee reinforcement. Relaxed fit.'
+  },
+  {
+    id: 'prod-12',
+    name: 'Acid Wash Drop Shoulder Tee',
+    brand: 'Magnet Vintage',
+    slug: 'acid-wash-drop-shoulder-tee',
+    sku: 'CL-TS-012',
+    category: 'clothing',
+    description: 'Each piece features a unique vintage acid-wash pattern. Cut in a heavy 240 GSM combed cotton with a structured drop-shoulder boxy fit.',
+    price: 1099,
+    discountPrice: 849,
+    image: '/images/clothing.jpg',
+    active: true,
+    featured: false,
+    trending: true,
+    bestseller: true,
+    newArrival: true,
+    rating: 4.8,
+    reviewsCount: 62,
+    variants: [
+      { id: 'v44', size: 'M', color: 'Charcoal Wash', stock: 15 },
+      { id: 'v45', size: 'L', color: 'Charcoal Wash', stock: 20 },
+      { id: 'v46', size: 'XL', color: 'Charcoal Wash', stock: 10 }
+    ],
+    specifications: [
+      { key: 'Material', value: '100% Combed Cotton' },
+      { key: 'Fabric weight', value: '240 GSM Heavyweight' },
+      { key: 'Finish', value: 'Custom acid wash process' }
+    ],
+    seoTitle: 'Acid Wash Drop Shoulder Tee - Heavyweight Wash Tee',
+    seoDescription: 'Unique vintage acid wash boxy fit drop shoulder tee. Premium heavy combed cotton.'
+  },
+  {
+    id: 'prod-13',
+    name: 'Retro Corduroy Cap',
+    brand: 'Magnet Wear',
+    slug: 'retro-corduroy-cap',
+    sku: 'CL-CP-013',
+    category: 'clothing',
+    description: 'Classic 6-panel unstructured cap made from durable 8-wale corduroy. Features a pre-curved visor, custom metal slider adjustment, and low-profile shape.',
+    price: 799,
+    discountPrice: 599,
+    image: '/images/clothing.jpg',
+    active: true,
+    featured: false,
+    trending: false,
+    bestseller: false,
+    newArrival: true,
+    rating: 4.4,
+    reviewsCount: 29,
+    variants: [
+      { id: 'v47', size: 'One Size', color: 'Mustard Yellow', stock: 15 },
+      { id: 'v48', size: 'One Size', color: 'Forest Green', stock: 15 },
+      { id: 'v49', size: 'One Size', color: 'Vintage Black', stock: 25 }
+    ],
+    specifications: [
+      { key: 'Material', value: '100% Cotton 8-Wale Corduroy' },
+      { key: 'Structure', value: 'Unstructured 6-Panel Layout' },
+      { key: 'Strap', value: 'Self-fabric backstrap with brass clasp' }
+    ],
+    seoTitle: 'Retro Corduroy Cap - Unstructured 6-Panel Hat',
+    seoDescription: 'Classic vintage-style corduroy cap. Unstructured design in rich seasonal colors.'
+  },
+  {
+    id: 'prod-14',
+    name: 'Cyberpunk Graphic Hoodie',
+    brand: 'Magnet Wear',
+    slug: 'cyberpunk-graphic-hoodie',
+    sku: 'CL-HD-014',
+    category: 'clothing',
+    description: 'Heavyweight graphic hoodie with high-resolution glowing cyberpunk aesthetic backprint. Double layer hood and thick ribbing.',
+    price: 2199,
+    discountPrice: 1699,
+    image: '/images/clothing.jpg',
+    active: true,
+    featured: true,
+    trending: false,
+    bestseller: false,
+    newArrival: true,
+    rating: 4.9,
+    reviewsCount: 51,
+    variants: [
+      { id: 'v50', size: 'M', color: 'Black', stock: 8 },
+      { id: 'v51', size: 'L', color: 'Black', stock: 12 },
+      { id: 'v52', size: 'XL', color: 'Black', stock: 6 }
+    ],
+    specifications: [
+      { key: 'Material', value: '75% Cotton, 25% Polyester fleece' },
+      { key: 'Weight', value: '380 GSM' },
+      { key: 'Graphics', value: 'High-density silk screen printing' }
+    ],
+    seoTitle: 'Cyberpunk Graphic Hoodie - Heavyweight streetwear',
+    seoDescription: 'Explore the Cyberpunk Graphic Hoodie. 380 GSM fleece hoodie with glowing retro-future graphics.'
+  },
+  {
+    id: 'prod-15',
+    name: 'Minimalist Coach Jacket',
+    brand: 'Magnet Technical',
+    slug: 'minimalist-coach-jacket',
+    sku: 'CL-JK-015',
+    category: 'clothing',
+    description: 'Water-resistant nylon shell with matte snap buttons, classic collar, drawcord hem, and elastic cuffs. Lightweight and stylish.',
+    price: 3299,
+    discountPrice: 2499,
+    image: '/images/clothing.jpg',
+    active: true,
+    featured: false,
+    trending: true,
+    bestseller: false,
+    newArrival: false,
+    rating: 4.5,
+    reviewsCount: 38,
+    variants: [
+      { id: 'v53', size: 'M', color: 'Dark Navy', stock: 5 },
+      { id: 'v54', size: 'L', color: 'Dark Navy', stock: 8 },
+      { id: 'v55', size: 'XL', color: 'Dark Navy', stock: 4 }
+    ],
+    specifications: [
+      { key: 'Material', value: '100% Ripstop Nylon Shell' },
+      { key: 'Lining', value: 'Soft Breathable Mesh Lining' },
+      { key: 'Hardware', value: 'Premium Matte Black Snap Buttons' }
+    ],
+    seoTitle: 'Minimalist Coach Jacket - Wind Resistant Outerwear',
+    seoDescription: 'Unisex minimalist coach jacket. Waterproof ripstop nylon with adjustable drawstrings.'
+  },
+  {
+    id: 'prod-16',
+    name: 'GaN 100W Desktop Charging Station',
+    brand: 'Magnet Power',
+    slug: 'gan-100w-desktop-charging-station',
+    sku: 'AC-CH-016',
+    category: 'accessories',
+    description: 'Powerful 100W multi-port charger for your desk. Features 3x USB-C and 1x USB-A ports to charge high-power laptops, tablets, and phones simultaneously.',
+    price: 4499,
+    discountPrice: 3499,
+    image: '/images/accessories.jpg',
+    active: true,
+    featured: true,
+    trending: true,
+    bestseller: true,
+    newArrival: true,
+    rating: 4.9,
+    reviewsCount: 88,
+    variants: [
+      { id: 'v56', specification: 'Standard', color: 'Space Grey', stock: 12 },
+      { id: 'v57', specification: 'Standard', color: 'Matte White', stock: 6 }
+    ],
+    specifications: [
+      { key: 'Max Output', value: '100W Power Delivery 3.0' },
+      { key: 'Ports', value: '3x USB Type-C, 1x USB Type-A' },
+      { key: 'Cable', value: 'Includes 1.5m AC power extension cord' }
+    ],
+    seoTitle: 'GaN 100W Desktop Charging Station - 4-Port Fast Charger',
+    seoDescription: 'Ultra-fast 100W GaN desktop power hub. Safely power up laptops and smartphones together.'
+  },
+  {
+    id: 'prod-17',
+    name: 'Tactical Tech Pouch Organizer',
+    brand: 'Magnet Technical',
+    slug: 'tactical-tech-pouch-organizer',
+    sku: 'AC-PO-017',
+    category: 'accessories',
+    description: 'Keep your chargers, cables, and tech gear organized. Water-repellent Cordura fabric with multiple mesh pockets, elastic loops, and soft padding.',
+    price: 1499,
+    discountPrice: 999,
+    image: '/images/accessories.jpg',
+    active: true,
+    featured: false,
+    trending: true,
+    bestseller: false,
+    newArrival: true,
+    rating: 4.6,
+    reviewsCount: 39,
+    variants: [
+      { id: 'v58', specification: 'Standard', color: 'Tactical Black', stock: 15 },
+      { id: 'v59', specification: 'Standard', color: 'Coyote Tan', stock: 10 }
+    ],
+    specifications: [
+      { key: 'Material', value: '1000D Water-resistant Cordura Nylon' },
+      { key: 'Dimensions', value: '24cm x 15cm x 7cm' },
+      { key: 'Zippers', value: 'YKK heavy-duty dual sliders' }
+    ],
+    seoTitle: 'Tactical Tech Pouch Organizer - Cordura Cable Organizer',
+    seoDescription: 'Durable padded cable organizer pouch. Multi-pocket interior layout for GaN chargers, power banks, and cords.'
+  },
+  {
+    id: 'prod-18',
+    name: 'MagSafe Ring Stand Grip',
+    brand: 'Magnet Armor',
+    slug: 'magsafe-ring-stand-grip',
+    sku: 'AC-RG-018',
+    category: 'accessories',
+    description: 'Double-duty MagSafe accessory. Snaps onto your phone case to act as a secure finger ring grip or a multi-angle kickstand.',
+    price: 899,
+    discountPrice: 599,
+    image: '/images/accessories.jpg',
+    active: true,
+    featured: false,
+    trending: false,
+    bestseller: true,
+    newArrival: true,
+    rating: 4.5,
+    reviewsCount: 112,
+    variants: [
+      { id: 'v60', color: 'Matte Black', stock: 20 },
+      { id: 'v61', color: 'Titanium Grey', stock: 15 },
+      { id: 'v62', color: 'Rose Gold', stock: 10 }
+    ],
+    specifications: [
+      { key: 'Magnet', value: 'N52 Ultra-strong neodymium ring' },
+      { key: 'Rotation', value: '360 degree rotation, 180 degree fold' },
+      { key: 'Material', value: 'Premium zinc alloy construction' }
+    ],
+    seoTitle: 'MagSafe Ring Stand Grip - Metal Magnetic Kickstand',
+    seoDescription: 'Ultra strong magnetic phone ring grip and adjustable table kickstand. Fits all MagSafe cases.'
+  },
+  {
+    id: 'prod-19',
+    name: 'GaN 35W Dual Port Car Charger',
+    brand: 'Magnet Power',
+    slug: 'gan-35w-dual-port-car-charger',
+    sku: 'AC-CC-019',
+    category: 'accessories',
+    description: 'Super compact mini car charger. Delivers 35W fast charging through dual USB-C and USB-A ports. Sits almost flush in your cigarette lighter socket.',
+    price: 999,
+    discountPrice: 699,
+    image: '/images/accessories.jpg',
+    active: true,
+    featured: false,
+    trending: false,
+    bestseller: false,
+    newArrival: false,
+    rating: 4.7,
+    reviewsCount: 73,
+    variants: [
+      { id: 'v63', specification: 'Standard', color: 'Space Black', stock: 18 }
+    ],
+    specifications: [
+      { key: 'Power Output', value: '35W Max Power Delivery 3.0 / QC 3.0' },
+      { key: 'Ports', value: '1x USB-C, 1x USB-A' },
+      { key: 'Material', value: 'Full fireproof aluminum alloy body' }
+    ],
+    seoTitle: 'GaN 35W Dual Port Car Charger - Mini Metal Adapter',
+    seoDescription: 'Compact car fast charger with dual output ports. Sleek metal shell, high temperature safety protection.'
+  },
+  {
+    id: 'prod-20',
+    name: 'High-Fidelity Wireless Headphones',
+    brand: 'Magnet Audio',
+    slug: 'high-fidelity-wireless-headphones',
+    sku: 'AC-HP-020',
+    category: 'accessories',
+    description: 'Over-ear studio-quality sound. Features custom 40mm silk-diaphragm drivers, advanced Hybrid Active Noise Cancellation, and 50-hour playback duration.',
+    price: 6999,
+    discountPrice: 5499,
+    image: '/images/accessories.jpg',
+    active: true,
+    featured: true,
+    trending: true,
+    bestseller: true,
+    newArrival: true,
+    rating: 4.8,
+    reviewsCount: 95,
+    variants: [
+      { id: 'v64', color: 'Charcoal Black', stock: 8 },
+      { id: 'v65', color: 'Sand Beige', stock: 5 }
+    ],
+    specifications: [
+      { key: 'Drivers', value: '40mm Silk-diaphragm dynamic drivers' },
+      { key: 'ANC Depth', value: 'Up to 38dB hybrid noise cancellation' },
+      { key: 'Battery Life', value: '50h (ANC off), 40h (ANC on), USB-C fast charge' }
+    ],
+    seoTitle: 'High-Fidelity Wireless Over-Ear Headphones - Hybrid ANC',
+    seoDescription: 'Premium active noise cancelling over-ear headphones. Studio audio profile, plush memory foam earcups.'
   }
 ];
 
@@ -447,7 +753,19 @@ const INITIAL_ORDERS = [
 export const StoreProvider = ({ children }) => {
   const [products, setProducts] = useState(() => {
     const saved = localStorage.getItem('magnet_products');
-    return saved ? JSON.parse(saved) : INITIAL_PRODUCTS;
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Merge code-defined products that are not present in localStorage
+      if (parsed.length < INITIAL_PRODUCTS.length) {
+        const parsedIds = new Set(parsed.map(p => p.id));
+        const missing = INITIAL_PRODUCTS.filter(p => !parsedIds.has(p.id));
+        const merged = [...parsed, ...missing];
+        localStorage.setItem('magnet_products', JSON.stringify(merged));
+        return merged;
+      }
+      return parsed;
+    }
+    return INITIAL_PRODUCTS;
   });
 
   const [categories, setCategories] = useState(() => {
