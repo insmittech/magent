@@ -1,5 +1,8 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { StoreContext } from '../../context/StoreContext';
+import { Hero3D } from './Hero3D';
+import { TrendingSection } from './TrendingSection';
+import { SortDropdown } from './SortDropdown';
 import { 
   ShoppingBag, Search, X, Plus, Minus, Check, ArrowRight, Phone, 
   MapPin, ShieldCheck, RefreshCw, Truck, Heart, Star, User, 
@@ -1925,14 +1928,7 @@ export const Storefront = () => {
             </div>
             
             <div className="filter-selects">
-              <select className="filter-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                <option value="featured">Sort: Popularity</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="newest">Sort: New Arrivals</option>
-                <option value="rating">Sort: Customer Rating</option>
-                <option value="discount">Sort: Deepest Discount</option>
-              </select>
+              <SortDropdown sortBy={sortBy} setSortBy={setSortBy} />
             </div>
           </div>
 
@@ -1995,115 +1991,8 @@ export const Storefront = () => {
       ) : (
         /* commerce-first structure homepage */
         <>
-          {/* Hero slider */}
-          <section className="hero-slider-section" style={{ position: 'relative' }}>
-            <div className="container">
-              {activeBanners.length > 0 && (() => {
-                const b = activeBanners[activeBannerIndex] || activeBanners[0];
-                return (
-                  <div key={b.id} className="hero-slider-card" style={{ position: 'relative' }}>
-                    <div className="hero-slide-grid">
-                      <div className="hero-slide-content">
-                        <span className="hero-tag">Best Offers</span>
-                        <h2 className="hero-slide-heading">{b.heading}</h2>
-                        <p className="hero-slide-subtitle">{b.subtitle}</p>
-                        <div className="hero-actions">
-                          <button className="btn btn-primary" onClick={() => { setActiveView('shop'); setActiveCategory('all'); }}>
-                            Shop Now <ArrowRight size={16} />
-                          </button>
-                          <button className="btn btn-secondary" onClick={() => { setActiveView('shop'); setSortBy('discount'); }}>
-                            View Deals
-                          </button>
-                        </div>
-                      </div>
-                      <div className="hero-slide-image-wrapper">
-                        <img src={b.image} alt={b.heading} className="hero-slide-img" />
-                      </div>
-                    </div>
-
-                    {/* Navigation Arrows */}
-                    {activeBanners.length > 1 && (
-                      <>
-                        <button 
-                          className="banner-nav-arrow left" 
-                          onClick={(e) => { e.stopPropagation(); setActiveBannerIndex(prev => (prev - 1 + activeBanners.length) % activeBanners.length); }}
-                          style={{
-                            position: 'absolute',
-                            left: '1rem',
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            background: 'rgba(0,0,0,0.4)',
-                            border: 'none',
-                            color: '#ffffff',
-                            borderRadius: '50%',
-                            width: '36px',
-                            height: '36px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            zIndex: 10
-                          }}
-                        >
-                          <ChevronLeft size={20} />
-                        </button>
-                        <button 
-                          className="banner-nav-arrow right" 
-                          onClick={(e) => { e.stopPropagation(); setActiveBannerIndex(prev => (prev + 1) % activeBanners.length); }}
-                          style={{
-                            position: 'absolute',
-                            right: '1rem',
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            background: 'rgba(0,0,0,0.4)',
-                            border: 'none',
-                            color: '#ffffff',
-                            borderRadius: '50%',
-                            width: '36px',
-                            height: '36px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            zIndex: 10
-                          }}
-                        >
-                          <ChevronRight size={20} />
-                        </button>
-
-                        {/* Bottom Slide Dots */}
-                        <div style={{
-                          position: 'absolute',
-                          bottom: '1rem',
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          display: 'flex',
-                          gap: '0.5rem',
-                          zIndex: 10
-                        }}>
-                          {activeBanners.map((_, idx) => (
-                            <button
-                              key={idx}
-                              onClick={(e) => { e.stopPropagation(); setActiveBannerIndex(idx); }}
-                              style={{
-                                width: '8px',
-                                height: '8px',
-                                borderRadius: '50%',
-                                border: 'none',
-                                background: idx === activeBannerIndex ? '#ef4444' : 'rgba(255,255,255,0.4)',
-                                cursor: 'pointer',
-                                transition: 'background 0.2s'
-                              }}
-                            />
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                );
-              })()}
-            </div>
-          </section>
+          {/* Premium 3D Hero */}
+          <Hero3D setActiveView={setActiveView} setActiveCategory={setActiveCategory} />
 
           {/* SHOP BY CATEGORY CIRCLES STRIP */}
           <section style={{ padding: '1rem 0' }}>
@@ -2189,64 +2078,14 @@ export const Storefront = () => {
             </div>
           </section>
 
-          {/* TRENDING / GRID SHOWCASE */}
-          <section className="catalog-section" style={{ padding: '1.5rem 0' }}>
-            <div className="container">
-              <div className="section-header">
-                <div>
-                  <h2 className="section-title">Trending Now</h2>
-                  <p className="section-subtitle">Most popular items in Vapi this week</p>
-                </div>
-                <button className="nav-link" onClick={() => { setActiveView('shop'); setActiveCategory('all'); }}>View All &rarr;</button>
-              </div>
-
-              <div className="product-slider-container">
-                <button className="product-slider-btn left" onClick={(e) => { e.stopPropagation(); handleScroll(trendingSliderRef, 'left'); }} aria-label="Slide Left">
-                  <ChevronLeft size={20} />
-                </button>
-                <div className="product-slider-track" ref={trendingSliderRef}>
-                  {products.filter(p => p.trending).map(product => {
-                    const isDiscounted = !!product.discountPrice;
-                    const discountPct = isDiscounted ? Math.round(((product.price - product.discountPrice) / product.price) * 100) : 0;
-                    const inWishlist = wishlist.some(w => w.id === product.id);
-
-                    return (
-                      <div key={product.id} className="product-card" onClick={() => handleProductClick(product)}>
-                        <div className="card-image-box">
-                          <img src={product.image} alt={product.name} className="card-image-main" />
-                          <button 
-                            className={`card-wishlist-btn ${inWishlist ? 'active' : ''}`}
-                            onClick={(e) => { e.stopPropagation(); toggleWishlist(product); }}
-                          >
-                            <Heart size={16} fill={inWishlist ? 'currentColor' : 'none'} />
-                          </button>
-                          {isDiscounted && <span className="badge-tag discount">-{discountPct}%</span>}
-                        </div>
-                        <div className="card-info-box">
-                          <span className="card-brand-label">{product.brand || 'Magnet'}</span>
-                          <h3 className="card-title-label">{product.name}</h3>
-                          <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                            <span className="rating-badge">{product.rating} ★</span>
-                            <span className="reviews-count">({product.reviewsCount})</span>
-                          </div>
-                          <div className="card-price-container">
-                            <span className="price">₹{product.discountPrice || product.price}</span>
-                            {isDiscounted && <span className="original-price">₹{product.price}</span>}
-                          </div>
-                          <button className="card-cta-btn" onClick={(e) => { e.stopPropagation(); handleQuickAdd(product, e); }}>
-                            Add to Cart
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                <button className="product-slider-btn right" onClick={(e) => { e.stopPropagation(); handleScroll(trendingSliderRef, 'right'); }} aria-label="Slide Right">
-                  <ChevronRight size={20} />
-                </button>
-              </div>
-            </div>
-          </section>
+          {/* Upgraded Trending Now Section with tabs */}
+          <TrendingSection
+            products={products}
+            wishlist={wishlist}
+            toggleWishlist={toggleWishlist}
+            handleProductClick={handleProductClick}
+            handleQuickAdd={handleQuickAdd}
+          />
 
           {/* CLOTHING COLLECTION */}
           <section className="catalog-section" style={{ padding: '1.5rem 0' }}>
@@ -2796,6 +2635,15 @@ export const Storefront = () => {
                   </div>
 
                   <div className="form-group">
+                    <label className="form-label">State *</label>
+                    <input 
+                      type="text" required name="state" className="form-input"
+                      value={checkoutForm.state} onChange={handleCheckoutChange}
+                      placeholder="e.g. Karnataka"
+                    />
+                  </div>
+
+                  <div className="form-group full">
                     <label className="form-label">Pincode *</label>
                     <input 
                       type="text" required name="pincode" className="form-input"
