@@ -1,0 +1,48 @@
+name: Deploy to Server via FTP
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ftp-deploy
+  cancel-in-progress: true
+
+jobs:
+  web-deploy:
+    name: Build & FTP Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚚 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Required for git-ftp / differential upload
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🏗️ Build Vite Application
+        run: npm run build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://api.insmittech.com/api' }}
+
+      - name: 🚀 Sync Files via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.ftp.insmittech.com }}
+          username: ${{ secrets.insmittech.com }}
+          password: ${{ secrets.Gujarati21 }}
+          port: ${{ secrets.FTP_PORT || 21 }}
+          protocol: ${{ secrets.FTP_PROTOCOL || 'ftp' }} # 'ftp', 'ftps', or 'ftps-legacy'
+          local-dir: ./dist/
+          server-dir: ${{ secrets.FTP_REMOTE_DIR || '/public_html/' }}
+          dangerous-clean-slate: false
