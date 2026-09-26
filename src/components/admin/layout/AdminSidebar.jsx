@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   LayoutDashboard, ShoppingCart, Package, FolderKanban, 
   AlertTriangle, Users, BarChart3, Star, Tag, Settings, 
-  ChevronLeft, ChevronRight, Store, Home
+  ChevronLeft, ChevronRight, Store, Home, ShieldAlert, SlidersHorizontal
 } from 'lucide-react';
 
 export const AdminSidebar = ({ 
@@ -14,9 +14,20 @@ export const AdminSidebar = ({
   onCloseMobile,
   ordersCount = 0,
   lowStockCount = 0,
+  adminRole = 'admin',
   onExitAdmin 
 }) => {
+  const isSuper = adminRole === 'super_admin';
+
   const navGroups = [
+    ...(isSuper ? [
+      {
+        group: 'MASTER GOVERNANCE',
+        items: [
+          { id: 'super-admin', label: 'Super Admin Controls', icon: ShieldAlert, badge: '👑 MASTER', badgeSuper: true },
+        ]
+      }
+    ] : []),
     {
       group: 'STORE',
       items: [
@@ -57,8 +68,14 @@ export const AdminSidebar = ({
           {!isCollapsed && (
             <div className="adm-brand-text">
               <span className="adm-brand-title">
-                Magnet<span style={{ color: 'var(--adm-primary)' }}>.</span>
-                <span className="adm-tag">ADMIN</span>
+                Magnet<span style={{ color: isSuper ? '#f59e0b' : 'var(--adm-primary)' }}>.</span>
+                <span className={`adm-tag ${isSuper ? 'super' : ''}`} style={{
+                  background: isSuper ? 'rgba(245, 158, 11, 0.15)' : undefined,
+                  color: isSuper ? '#f59e0b' : undefined,
+                  borderColor: isSuper ? 'rgba(245, 158, 11, 0.3)' : undefined
+                }}>
+                  {isSuper ? '👑 SUPER ADMIN' : 'ADMIN'}
+                </span>
               </span>
               <span className="adm-brand-sub">Vapi Official</span>
             </div>
@@ -78,7 +95,9 @@ export const AdminSidebar = ({
       <div className="adm-sidebar-nav">
         {navGroups.map((group, gIdx) => (
           <div key={gIdx} className="adm-nav-group">
-            <span className="adm-nav-group-title">{group.group}</span>
+            <span className="adm-nav-group-title" style={{ color: group.group === 'MASTER GOVERNANCE' ? '#f59e0b' : undefined }}>
+              {group.group}
+            </span>
             {group.items.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id || (item.id === 'products' && activeTab === 'product-form');
@@ -86,17 +105,24 @@ export const AdminSidebar = ({
                 <button
                   key={item.id}
                   type="button"
-                  className={`adm-nav-item ${isActive ? 'active' : ''}`}
+                  className={`adm-nav-item ${isActive ? 'active' : ''} ${item.id === 'super-admin' ? 'super-item' : ''}`}
                   onClick={() => {
                     onSelectTab(item.id);
                     if (onCloseMobile) onCloseMobile();
                   }}
                   title={isCollapsed ? item.label : undefined}
                 >
-                  <Icon size={18} className="adm-nav-icon" />
-                  <span className="adm-nav-label">{item.label}</span>
+                  <Icon size={18} className="adm-nav-icon" style={{ color: item.id === 'super-admin' ? '#f59e0b' : undefined }} />
+                  <span className="adm-nav-label" style={{ fontWeight: item.id === 'super-admin' ? 800 : undefined }}>{item.label}</span>
                   {item.badge && !isCollapsed && (
-                    <span className={`adm-nav-badge ${item.badgeWarning ? 'warning' : ''}`}>
+                    <span 
+                      className={`adm-nav-badge ${item.badgeWarning ? 'warning' : ''}`}
+                      style={{
+                        background: item.badgeSuper ? 'rgba(245, 158, 11, 0.18)' : undefined,
+                        color: item.badgeSuper ? '#f59e0b' : undefined,
+                        fontWeight: 800
+                      }}
+                    >
                       {item.badge}
                     </span>
                   )}

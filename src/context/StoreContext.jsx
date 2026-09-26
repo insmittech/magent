@@ -650,8 +650,94 @@ const INITIAL_SETTINGS = {
   email: 'contact@magnetstore.com',
   announcement: '🔥 Deals of the Day: Flat 20% off on premium Graphic Tees! Free Delivery on orders above ₹1499',
   brandColor: '#ef4444',
-  brandFont: 'Plus Jakarta Sans'
+  brandFont: 'Plus Jakarta Sans',
+  superAdminControls: {
+    maxProductLimit: 25,
+    allowAdminDeleteProduct: true,
+    allowAdminPriceEdit: true,
+    allowAdminDiscountAboveLimit: false,
+    maxDiscountLimit: 50,
+    maintenanceMode: false,
+    maintenanceMessage: 'Magnet Vapi Official is currently undergoing scheduled maintenance. Orders will resume shortly!',
+    enableCod: true,
+    enableDirectBuy: true,
+    maxOrderQtyPerItem: 5,
+    allowAdminManageCategories: true,
+    requireAdminApprovalForReviews: false
+  }
 };
+
+const INITIAL_ADMIN_USERS = [
+  {
+    id: 'adm-usr-1',
+    name: 'Super Admin Master',
+    email: 'superadmin@magnet.com',
+    username: 'superadmin',
+    role: 'super_admin',
+    status: 'Active',
+    avatarColor: '#f59e0b',
+    department: 'Executive Governance',
+    createdAt: '2026-01-01',
+    lastLogin: 'Active now'
+  },
+  {
+    id: 'adm-usr-2',
+    name: 'Staff Store Manager',
+    email: 'admin@magnet.com',
+    username: 'admin',
+    role: 'admin',
+    status: 'Active',
+    avatarColor: '#3b82f6',
+    department: 'Store Operations',
+    createdAt: '2026-03-15',
+    lastLogin: '2 hours ago'
+  },
+  {
+    id: 'adm-usr-3',
+    name: 'Kiran Inventory Lead',
+    email: 'kiran.inv@magnet.com',
+    username: 'kiran',
+    role: 'inventory_manager',
+    status: 'Active',
+    avatarColor: '#10b981',
+    department: 'Warehouse & Fulfillment',
+    createdAt: '2026-06-10',
+    lastLogin: 'Yesterday'
+  }
+];
+
+const INITIAL_AUDIT_LOGS = [
+  {
+    id: 'log-1',
+    timestamp: '2026-09-25T11:00:00Z',
+    adminName: 'Super Admin Master',
+    adminEmail: 'superadmin@magnet.com',
+    role: 'super_admin',
+    action: 'QUOTA_CONFIGURATION',
+    details: 'Catalog creation quota verified at 25 products maximum limit.',
+    ip: '103.241.11.45'
+  },
+  {
+    id: 'log-2',
+    timestamp: '2026-09-25T09:30:00Z',
+    adminName: 'Staff Store Manager',
+    adminEmail: 'admin@magnet.com',
+    role: 'admin',
+    action: 'PRODUCT_INVENTORY',
+    details: 'Stock levels verified on Slim Fit Cargo Jeans and Hoodies.',
+    ip: '103.241.11.48'
+  },
+  {
+    id: 'log-3',
+    timestamp: '2026-09-24T18:12:00Z',
+    adminName: 'Super Admin Master',
+    adminEmail: 'superadmin@magnet.com',
+    role: 'super_admin',
+    action: 'SECURITY_CONTROL',
+    details: 'Verified Cash on Delivery (COD) threshold & master store safety.',
+    ip: '103.241.11.45'
+  }
+];
 
 const INITIAL_BANNERS = [
   {
@@ -809,6 +895,86 @@ export const StoreProvider = ({ children }) => {
   });
 
   const [isAdmin, setIsAdmin] = useState(false);
+  const [adminRole, setAdminRole] = useState(() => {
+    return localStorage.getItem('magnet_admin_role') || 'admin';
+  });
+
+  const [adminUsers, setAdminUsers] = useState(() => {
+    const saved = localStorage.getItem('magnet_admin_users');
+    return saved ? JSON.parse(saved) : INITIAL_ADMIN_USERS;
+  });
+
+  const [adminAuditLogs, setAdminAuditLogs] = useState(() => {
+    const saved = localStorage.getItem('magnet_admin_audit_logs');
+    return saved ? JSON.parse(saved) : INITIAL_AUDIT_LOGS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('magnet_admin_role', adminRole);
+  }, [adminRole]);
+
+  useEffect(() => {
+    localStorage.setItem('magnet_admin_users', JSON.stringify(adminUsers));
+  }, [adminUsers]);
+
+  useEffect(() => {
+    localStorage.setItem('magnet_admin_audit_logs', JSON.stringify(adminAuditLogs));
+  }, [adminAuditLogs]);
+
+  // Log Audit Action Helper
+  const logAdminAction = (action, details, customUser = null) => {
+    const actor = customUser || {
+      name: adminRole === 'super_admin' ? 'Super Admin Master' : 'Staff Store Manager',
+      email: adminRole === 'super_admin' ? 'superadmin@magnet.com' : 'admin@magnet.com',
+      role: adminRole
+    };
+
+    const newLog = {
+      id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      timestamp: new Date().toISOString(),
+      adminName: actor.name,
+      adminEmail: actor.email,
+      role: actor.role,
+      action,
+      details,
+      ip: '103.241.11.45'
+    };
+
+    setAdminAuditLogs(prev => [newLog, ...prev.slice(0, 49)]); // keep last 50
+  };
+
+  // Super Admin Controls Actions
+  const updateSuperAdminControls = (newControls) => {
+    setSettings(prev => {
+      const updated = {
+        ...prev,
+        superAdminControls: {
+          ...(prev?.superAdminControls || {}),
+          ...newControls
+        }
+      };
+      localStorage.setItem('magnet_settings', JSON.stringify(updated));
+      return updated;
+    });
+
+    logAdminAction('SUPER_ADMIN_UPDATE', `Updated super admin controls: Max Product Limit=${newControls.maxProductLimit || 25}`);
+  };
+
+  const addAdminUser = (newUser) => {
+    setAdminUsers(prev => [newUser, ...prev]);
+    logAdminAction('ADMIN_USER_CREATE', `Created new ${newUser.role} account for ${newUser.name} (${newUser.email})`);
+  };
+
+  const updateAdminUser = (id, updates) => {
+    setAdminUsers(prev => prev.map(u => u.id === id ? { ...u, ...updates } : u));
+    logAdminAction('ADMIN_USER_UPDATE', `Updated admin user ${id} with: ${JSON.stringify(updates)}`);
+  };
+
+  const deleteAdminUser = (id) => {
+    const target = adminUsers.find(u => u.id === id);
+    setAdminUsers(prev => prev.filter(u => u.id !== id));
+    logAdminAction('ADMIN_USER_DELETE', `Removed admin account: ${target?.name || id}`);
+  };
 
   // Upgrade legacy placeholder images in local storage on startup
   useEffect(() => {
@@ -922,6 +1088,13 @@ export const StoreProvider = ({ children }) => {
 
   // Product Actions
   const addProduct = async (product) => {
+    const maxLimit = settings?.superAdminControls?.maxProductLimit || 25;
+    if (adminRole !== 'super_admin' && products.length >= maxLimit) {
+      const errMsg = `Product Catalog Quota Reached (${products.length}/${maxLimit}). Standard admins cannot add more products. Please contact the Super Admin to increase the catalog limit.`;
+      console.warn(errMsg);
+      throw new Error(errMsg);
+    }
+
     try {
       const formData = new FormData();
       Object.keys(product).forEach(key => {
@@ -933,8 +1106,12 @@ export const StoreProvider = ({ children }) => {
       });
       const created = await api.products.create(formData);
       setProducts((prev) => [created, ...prev]);
+      logAdminAction('PRODUCT_CREATE', `Added new product: ${product.name} (SKU: ${product.sku})`);
       return created;
     } catch (err) {
+      if (err.message && err.message.includes('Quota Reached')) {
+        throw err;
+      }
       console.warn('API addProduct failed, saving locally:', err.message);
       const newProduct = {
         ...product,
@@ -944,6 +1121,7 @@ export const StoreProvider = ({ children }) => {
         reviewsCount: product.reviewsCount || Math.floor(10 + Math.random() * 200)
       };
       setProducts((prev) => [newProduct, ...prev]);
+      logAdminAction('PRODUCT_CREATE', `Added new product (local): ${product.name} (SKU: ${product.sku})`);
       return newProduct;
     }
   };
@@ -1319,6 +1497,15 @@ export const StoreProvider = ({ children }) => {
         recentlyViewed,
         isAdmin,
         setIsAdmin,
+        adminRole,
+        setAdminRole,
+        adminUsers,
+        adminAuditLogs,
+        updateSuperAdminControls,
+        addAdminUser,
+        updateAdminUser,
+        deleteAdminUser,
+        logAdminAction,
         setSettings,
         addProduct,
         updateProduct,

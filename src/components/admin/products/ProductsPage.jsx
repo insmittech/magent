@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
 import { 
   Plus, Search, Filter, LayoutList, LayoutGrid, 
-  Edit, ToggleLeft, ToggleRight, Trash2, Copy, Eye, Tag
+  Edit, ToggleLeft, ToggleRight, Trash2, Copy, Eye, Tag,
+  ShieldAlert, SlidersHorizontal, Lock, CheckCircle2
 } from 'lucide-react';
 
 export const ProductsPage = ({
   products = [],
   categories = [],
+  superAdminControls = {},
+  adminRole = 'admin',
   onAddNew,
   onEditProduct,
   onToggleActive,
   onDeleteProduct,
-  onDuplicateProduct
+  onDuplicateProduct,
+  onNavigate
 }) => {
   const [search, setSearch] = useState('');
   const [selectedCat, setSelectedCat] = useState('all');
@@ -19,6 +23,12 @@ export const ProductsPage = ({
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'active' | 'inactive'
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'grid'
   const [selectedIds, setSelectedIds] = useState([]);
+
+  const isSuper = adminRole === 'super_admin';
+  const maxLimit = superAdminControls?.maxProductLimit || 25;
+  const isLimitReached = products.length >= maxLimit;
+  const allowDelete = isSuper || superAdminControls?.allowAdminDeleteProduct !== false;
+  const usagePercent = Math.min(100, Math.round((products.length / maxLimit) * 100));
 
   // Filter & Search Logic
   const filteredProducts = products.filter(p => {
@@ -58,6 +68,10 @@ export const ProductsPage = ({
   };
 
   const handleBulkDelete = () => {
+    if (!allowDelete) {
+      alert('Product deletion has been locked by the Super Admin.');
+      return;
+    }
     if (window.confirm(`Delete ${selectedIds.length} selected products permanently?`)) {
       selectedIds.forEach(id => onDeleteProduct(id));
       setSelectedIds([]);
@@ -66,6 +80,36 @@ export const ProductsPage = ({
 
   return (
     <div>
+      {/* Super Admin Quota Banner */}
+      <div className={`adm-catalog-quota-banner ${usagePercent >= 90 ? 'danger' : usagePercent >= 75 ? 'warning' : ''}`}>
+        <div className="quota-banner-info">
+          <ShieldAlert size={20} color={usagePercent >= 90 ? '#ef4444' : usagePercent >= 75 ? '#f59e0b' : '#3b82f6'} />
+          <div>
+            <div className="quota-banner-title">
+              Catalog Quota: <strong>{products.length} / {maxLimit} Products Added</strong> ({usagePercent}% used)
+            </div>
+            <div className="quota-banner-desc">
+              {isLimitReached
+                ? isSuper
+                  ? 'Limit reached! As Super Admin, you can adjust or raise the quota ceiling anytime.'
+                  : 'Product limit reached. Standard admins cannot add more products until Super Admin raises the quota.'
+                : `${maxLimit - products.length} product creation slots remaining for standard staff.`}
+            </div>
+          </div>
+        </div>
+
+        {isSuper && onNavigate && (
+          <button
+            type="button"
+            className="adm-btn adm-btn-secondary adm-btn-sm"
+            onClick={() => onNavigate('super-admin')}
+            style={{ fontWeight: 700, gap: '0.4rem' }}
+          >
+            <SlidersHorizontal size={14} /> Adjust Quota Limit
+          </button>
+        )}
+      </div>
+
       {/* Header */}
       <div className="adm-page-header">
         <div>
@@ -74,8 +118,18 @@ export const ProductsPage = ({
         </div>
 
         <div className="adm-header-actions">
-          <button type="button" className="adm-btn adm-btn-primary" onClick={onAddNew}>
-            <Plus size={16} /> Add Product
+          <button 
+            type="button" 
+            className="adm-btn adm-btn-primary" 
+            onClick={onAddNew}
+            disabled={!isSuper && isLimitReached}
+            title={!isSuper && isLimitReached ? `Catalog limit of ${maxLimit} reached. Super Admin limit active.` : 'Add Product'}
+            style={{
+              opacity: (!isSuper && isLimitReached) ? 0.6 : 1,
+              cursor: (!isSuper && isLimitReached) ? 'not-allowed' : 'pointer'
+            }}
+          >
+            <Plus size={16} /> Add Product {!isSuper && isLimitReached ? '(Limit Reached)' : ''}
           </button>
         </div>
       </div>
@@ -108,9 +162,9 @@ export const ProductsPage = ({
               value={stockFilter}
               onChange={(e) => setStockFilter(e.target.value)}
             >
-              <option value="all">All Stock Levels</option>
-              <option value="low">Low Stock (≤ 5 units)</option>
-              <option value="out">Out of Stock (0 units)</option>
+              <option value="all">Stock: All</option>
+              <option value="low">Low Stock (≤ 5)</option>
+              <option value="out">Out of Stock (0)</option>
             </select>
 
             <select
@@ -118,55 +172,55 @@ export const ProductsPage = ({
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <option value="all">All Statuses</option>
-              <option value="active">Active in Store</option>
-              <option value="inactive">Disabled / Draft</option>
+              <option value="all">Status: All</option>
+              <option value="active">Active</option>
+              <option value="inactive">Disabled</option>
             </select>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            {selectedIds.length > 0 && (
-              <button 
-                type="button" 
+            {selectedIds.length > 0 && allowDelete && (
+              <button
+                type="button"
                 className="adm-btn adm-btn-danger adm-btn-sm"
                 onClick={handleBulkDelete}
               >
-                <Trash2 size={13} /> Delete ({selectedIds.length})
+                <Trash2 size={14} /> Delete ({selectedIds.length})
               </button>
             )}
 
-            <div className="adm-pill-group">
+            <div className="adm-view-toggle">
               <button
                 type="button"
-                className={`adm-pill-btn ${viewMode === 'list' ? 'active' : ''}`}
+                className={`adm-view-btn ${viewMode === 'list' ? 'active' : ''}`}
                 onClick={() => setViewMode('list')}
                 title="List View"
               >
-                <LayoutList size={15} />
+                <LayoutList size={16} />
               </button>
               <button
                 type="button"
-                className={`adm-pill-btn ${viewMode === 'grid' ? 'active' : ''}`}
+                className={`adm-view-btn ${viewMode === 'grid' ? 'active' : ''}`}
                 onClick={() => setViewMode('grid')}
                 title="Grid View"
               >
-                <LayoutGrid size={15} />
+                <LayoutGrid size={16} />
               </button>
             </div>
           </div>
         </div>
 
-        {/* View Mode 1: Dense List View (Default) */}
+        {/* View Mode 1: Table List View */}
         {viewMode === 'list' && (
-          <div className="adm-table-scroll">
+          <div style={{ overflowX: 'auto' }}>
             <table className="adm-table">
               <thead>
                 <tr>
-                  <th style={{ width: '32px' }}>
+                  <th style={{ width: '40px' }}>
                     <input
                       type="checkbox"
-                      checked={selectedIds.length === filteredProducts.length && filteredProducts.length > 0}
                       onChange={handleSelectAll}
+                      checked={selectedIds.length > 0 && selectedIds.length === filteredProducts.length}
                     />
                   </th>
                   <th>Product</th>
@@ -181,8 +235,8 @@ export const ProductsPage = ({
               <tbody>
                 {filteredProducts.length === 0 ? (
                   <tr>
-                    <td colSpan="8" style={{ textAlign: 'center', padding: '3rem', color: 'var(--adm-text-muted)' }}>
-                      No products match the selected filters.
+                    <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: 'var(--adm-text-muted)' }}>
+                      No products matched your search or filters.
                     </td>
                   </tr>
                 ) : (
@@ -200,19 +254,19 @@ export const ProductsPage = ({
                           />
                         </td>
                         <td>
-                          <div className="adm-prod-cell">
-                            <img src={p.image} alt={p.name} className="adm-prod-thumb" />
-                            <div className="adm-prod-info">
-                              <span className="adm-prod-name">{p.name}</span>
-                              <span className="adm-prod-sub">{p.brand || 'Magnet Wear'}</span>
+                          <div className="adm-product-cell">
+                            <img src={p.image} alt={p.name} className="adm-product-thumb" />
+                            <div>
+                              <div className="adm-product-name">{p.name}</div>
+                              <div className="adm-product-brand">{p.brand || 'Magnet'}</div>
                             </div>
                           </div>
                         </td>
-                        <td><code>{p.sku}</code></td>
                         <td>
-                          <span style={{ fontSize: '0.8rem', color: 'var(--adm-text-sub)' }}>
-                            {categories.find(c => c.id === p.category)?.name || p.category}
-                          </span>
+                          <span className="adm-sku-tag">{p.sku}</span>
+                        </td>
+                        <td>
+                          <span className="adm-category-tag">{p.category}</span>
                         </td>
                         <td>
                           <strong>₹{p.discountPrice || p.price}</strong>
@@ -254,11 +308,17 @@ export const ProductsPage = ({
                               type="button"
                               className="adm-btn-icon danger"
                               onClick={() => {
+                                if (!allowDelete) {
+                                  alert('Product deletion is locked by the Super Admin.');
+                                  return;
+                                }
                                 if (window.confirm(`Delete "${p.name}" permanently?`)) {
                                   onDeleteProduct(p.id);
                                 }
                               }}
-                              title="Delete product"
+                              disabled={!allowDelete}
+                              title={allowDelete ? "Delete product" : "Deletion locked by Super Admin"}
+                              style={{ opacity: !allowDelete ? 0.35 : 1, cursor: !allowDelete ? 'not-allowed' : 'pointer' }}
                             >
                               <Trash2 size={14} />
                             </button>

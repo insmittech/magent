@@ -302,6 +302,7 @@ const INITIAL_PRODUCTS = [
     seoTitle: 'Premium Wireless Active Noise Cancelling Earbuds',
     seoDescription: 'Experience immersive audio with hybrid active noise cancellation, custom audio profile, and long battery life.'
   },
+  {
     name: 'MagSafe Leather Card Wallet',
     brand: 'Magnet Leather',
     slug: 'magsafe-leather-card-wallet',
@@ -664,7 +665,17 @@ const seedData = async () => {
     await Banner.deleteMany();
     await Setting.deleteMany();
 
-    // Create Admin user
+    // Create Super Admin & Admin users
+    await User.create({
+      name: 'Super Admin Master',
+      phone: '9999900000',
+      email: 'superadmin@magnet.com',
+      password: 'superadmin123',
+      role: 'super_admin',
+      addresses: []
+    });
+    console.log('Super Admin user seeded: superadmin@magnet.com / superadmin123');
+
     await User.create({
       name: 'Magnet Admin Staff',
       phone: '9999988888',
