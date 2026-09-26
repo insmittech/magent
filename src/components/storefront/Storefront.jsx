@@ -3,11 +3,12 @@ import { StoreContext } from '../../context/StoreContext';
 import { Hero3D } from './Hero3D';
 import { TrendingSection } from './TrendingSection';
 import { SortDropdown } from './SortDropdown';
+import { ProductReviews } from './ProductReviews';
 import { 
   ShoppingBag, Search, X, Plus, Minus, Check, ArrowRight, Phone, 
   MapPin, ShieldCheck, RefreshCw, Truck, Heart, Star, User, 
   Package, MapPinned, History, LogOut, ChevronRight, Percent, Calendar, Home, FolderKanban,
-  Lock, Sun, Moon, ChevronLeft
+  Lock, Sun, Moon, ChevronLeft, AlertTriangle
 } from 'lucide-react';
 
 export const Storefront = () => {
@@ -329,6 +330,28 @@ export const Storefront = () => {
 
   return (
     <div className="storefront-root" style={{ paddingBottom: '3.75rem' }}>
+      {/* Super Admin Maintenance Mode Banner */}
+      {settings?.superAdminControls?.maintenanceMode && (
+        <div style={{
+          background: 'linear-gradient(90deg, #b91c1c, #dc2626)',
+          color: '#ffffff',
+          padding: '0.65rem 1rem',
+          textAlign: 'center',
+          fontWeight: 700,
+          fontSize: '0.88rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.5rem',
+          position: 'sticky',
+          top: 0,
+          zIndex: 9999
+        }}>
+          <AlertTriangle size={18} />
+          <span>{settings?.superAdminControls?.maintenanceMessage || 'Store is under Maintenance Mode.'}</span>
+        </div>
+      )}
+
       {/* Announcement Bar */}
       {settings.announcement && (
         <div className="announcement-bar">
@@ -1524,9 +1547,21 @@ export const Storefront = () => {
                 <span className="detail-sku">{selectedProduct.brand || 'Magnet'} | SKU: {selectedProduct.sku}</span>
                 <h2 className="detail-title">{selectedProduct.name}</h2>
                 
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <div 
+                  style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', cursor: 'pointer' }}
+                  onClick={() => {
+                    setDetailActiveTab('reviews');
+                    const tabsEl = document.querySelector('.detail-info-tabs');
+                    if (tabsEl) {
+                      tabsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }}
+                  title="Click to view Customer Reviews & Ratings"
+                >
                   <span className="rating-badge">{selectedProduct.rating} ★</span>
-                  <span className="reviews-count">({selectedProduct.reviewsCount} customer reviews)</span>
+                  <span className="reviews-count" style={{ textDecoration: 'underline', textUnderlineOffset: '2px' }}>
+                    ({selectedProduct.reviewsCount} customer reviews)
+                  </span>
                 </div>
 
                 <div className="detail-price-row">
@@ -1770,6 +1805,9 @@ export const Storefront = () => {
               <div className="tabs-strip">
                 <button className={`tab-btn ${detailActiveTab === 'desc' ? 'active' : ''}`} onClick={() => setDetailActiveTab('desc')}>Description</button>
                 <button className={`tab-btn ${detailActiveTab === 'specs' ? 'active' : ''}`} onClick={() => setDetailActiveTab('specs')}>Specifications</button>
+                <button className={`tab-btn ${detailActiveTab === 'reviews' ? 'active' : ''}`} onClick={() => setDetailActiveTab('reviews')}>
+                  Customer Reviews ({selectedProduct.reviewsCount})
+                </button>
               </div>
 
               {detailActiveTab === 'desc' && (
@@ -1798,6 +1836,13 @@ export const Storefront = () => {
                     </tbody>
                   </table>
                 </div>
+              )}
+
+              {detailActiveTab === 'reviews' && (
+                <ProductReviews 
+                  product={selectedProduct} 
+                  userProfile={userProfile} 
+                />
               )}
             </div>
           </div>

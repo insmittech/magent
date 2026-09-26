@@ -14,6 +14,7 @@ import { MarketingPage } from './marketing/MarketingPage';
 import { AnalyticsPage } from './analytics/AnalyticsPage';
 import { ReviewsPage } from './reviews/ReviewsPage';
 import { SettingsPage } from './settings/SettingsPage';
+import { SuperAdminPage } from './superadmin/SuperAdminPage';
 
 export const AdminDashboard = () => {
   const { 
@@ -24,6 +25,15 @@ export const AdminDashboard = () => {
     banners,
     isAdmin, 
     setIsAdmin,
+    adminRole,
+    setAdminRole,
+    adminUsers,
+    adminAuditLogs,
+    updateSuperAdminControls,
+    addAdminUser,
+    updateAdminUser,
+    deleteAdminUser,
+    logAdminAction,
     setSettings, 
     addProduct, 
     updateProduct, 
@@ -38,7 +48,7 @@ export const AdminDashboard = () => {
     getKPIs
   } = useContext(StoreContext);
 
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState(adminRole === 'super_admin' ? 'super-admin' : 'dashboard');
   const [editingProduct, setEditingProduct] = useState(null);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [toasts, setToasts] = useState([]);
@@ -81,16 +91,20 @@ export const AdminDashboard = () => {
   };
 
   // Product Actions
-  const handleSaveProduct = (payload) => {
-    if (editingProduct) {
-      updateProduct(editingProduct.id, payload);
-      showToast(`Product "${payload.name}" updated successfully!`, 'success');
-    } else {
-      addProduct(payload);
-      showToast(`Product "${payload.name}" added to catalog!`, 'success');
+  const handleSaveProduct = async (payload) => {
+    try {
+      if (editingProduct) {
+        await updateProduct(editingProduct.id, payload);
+        showToast(`Product "${payload.name}" updated successfully!`, 'success');
+      } else {
+        await addProduct(payload);
+        showToast(`Product "${payload.name}" added to catalog!`, 'success');
+      }
+      setEditingProduct(null);
+      setActiveTab('products');
+    } catch (err) {
+      showToast(err.message || 'Failed to save product.', 'error');
     }
-    setEditingProduct(null);
-    setActiveTab('products');
   };
 
   const handleToggleProductActive = (id, active) => {
@@ -100,9 +114,13 @@ export const AdminDashboard = () => {
   };
 
   const handleDeleteProduct = (id) => {
-    const prod = products.find(p => p.id === id);
-    deleteProduct(id);
-    showToast(`"${prod?.name || 'Product'}" deleted permanently.`, 'error');
+    try {
+      const prod = products.find(p => p.id === id);
+      deleteProduct(id);
+      showToast(`"${prod?.name || 'Product'}" deleted permanently.`, 'error');
+    } catch (err) {
+      showToast(err.message || 'Deletion prohibited.', 'error');
+    }
   };
 
   // Inventory Variant Stock Adjustments
@@ -140,26 +158,27 @@ export const AdminDashboard = () => {
     showToast(`Category removed.`, 'error');
   };
 
-  // Banner Actions
+  // Marketing Actions
   const handleAddBanner = (bannerData) => {
     addBanner(bannerData);
-    showToast(`Hero banner added!`, 'success');
+    showToast(`Promo banner added!`, 'success');
   };
 
   const handleUpdateBanner = (bannerId, bannerData) => {
     updateBanner(bannerId, bannerData);
-    showToast(`Hero banner updated!`, 'success');
+    showToast(`Banner updated successfully!`, 'success');
   };
 
   const handleDeleteBanner = (bannerId) => {
     deleteBanner(bannerId);
-    showToast(`Hero banner removed.`, 'error');
+    showToast(`Banner removed.`, 'error');
   };
 
-  // Settings Action
-  const handleSaveSettings = (updatedSettings) => {
-    setSettings(prev => ({ ...prev, ...updatedSettings }));
-    showToast(`Store configuration saved!`, 'success');
+  // Settings Actions
+  const handleSaveSettings = (newSettings) => {
+    setSettings(newSettings);
+    localStorage.setItem('magnet_settings', JSON.stringify(newSettings));
+    showToast('Store settings saved successfully!', 'success');
   };
 
   return (
@@ -172,19 +191,32 @@ export const AdminDashboard = () => {
       toasts={toasts}
       onDismissToast={handleDismissToast}
       onExitAdmin={() => setIsAdmin(false)}
-      lowStockCount={(kpis.lowStockCount || 0) + (kpis.outOfStockCount || 0)}
+      lowStockCount={kpis.lowStockCount}
+      adminRole={adminRole}
     >
-      {/* 1. Dashboard Overview */}
+      {/* 0. Super Admin Master Governance */}
+      {activeTab === 'super-admin' && (
+        <SuperAdminPage
+          products={products}
+          settings={settings}
+          adminUsers={adminUsers}
+          auditLogs={adminAuditLogs}
+          onUpdateControls={updateSuperAdminControls}
+          onAddAdminUser={addAdminUser}
+          onUpdateAdminUser={updateAdminUser}
+          onDeleteAdminUser={deleteAdminUser}
+          showToast={showToast}
+        />
+      )}
+
+      {/* 1. Overview Dashboard */}
       {activeTab === 'dashboard' && (
         <OverviewDashboard
           kpis={kpis}
-          products={products}
           orders={orders}
+          products={products}
           onNavigate={handleNavigate}
-          onSelectOrder={(id) => handleNavigate('orders', { selectedOrder: id })}
-          onAdjustStock={(prodId, varId, currentStock, name) => {
-            handleNavigate('inventory');
-          }}
+          onUpdateOrderStatus={handleUpdateOrderStatus}
         />
       )}
 
@@ -193,10 +225,13 @@ export const AdminDashboard = () => {
         <ProductsPage
           products={products}
           categories={categories}
+          superAdminControls={settings?.superAdminControls}
+          adminRole={adminRole}
           onAddNew={() => handleNavigate('product-form')}
           onEditProduct={(p) => handleNavigate('product-form', { product: p })}
           onToggleActive={handleToggleProductActive}
           onDeleteProduct={handleDeleteProduct}
+          onNavigate={handleNavigate}
         />
       )}
 
@@ -205,6 +240,8 @@ export const AdminDashboard = () => {
         <ProductEditor
           initialProduct={editingProduct}
           categories={categories}
+          superAdminControls={settings?.superAdminControls}
+          adminRole={adminRole}
           onSave={handleSaveProduct}
           onCancel={() => {
             setEditingProduct(null);
@@ -218,10 +255,11 @@ export const AdminDashboard = () => {
         <InventoryPage
           products={products}
           onUpdateVariantStock={handleUpdateVariantStock}
+          onNavigate={handleNavigate}
         />
       )}
 
-      {/* 5. Orders Pipeline */}
+      {/* 5. Customer Orders */}
       {activeTab === 'orders' && (
         <OrdersPage
           orders={orders}
@@ -234,6 +272,7 @@ export const AdminDashboard = () => {
       {activeTab === 'customers' && (
         <CustomersPage
           orders={orders}
+          onViewOrder={(orderId) => handleNavigate('orders', { selectedOrder: orderId })}
         />
       )}
 

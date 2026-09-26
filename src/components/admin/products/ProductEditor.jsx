@@ -6,9 +6,15 @@ import { VariantSpreadsheet } from './VariantSpreadsheet';
 export const ProductEditor = ({
   initialProduct = null,
   categories = [],
+  superAdminControls = {},
+  adminRole = 'admin',
   onSave,
   onCancel
 }) => {
+  const isSuper = adminRole === 'super_admin';
+  const allowPriceEdit = isSuper || superAdminControls?.allowAdminPriceEdit !== false || !initialProduct;
+  const maxDiscountAllowed = superAdminControls?.maxDiscountLimit || 50;
+
   const [form, setForm] = useState({
     name: initialProduct?.name || '',
     brand: initialProduct?.brand || 'Magnet Wear',
@@ -47,10 +53,22 @@ export const ProductEditor = ({
     }));
   };
 
+  // Calculate discount percentage
+  const priceNum = parseFloat(form.price) || 0;
+  const discountNum = parseFloat(form.discountPrice) || 0;
+  const discountPercent = (priceNum > 0 && discountNum > 0 && discountNum < priceNum)
+    ? Math.round(((priceNum - discountNum) / priceNum) * 100)
+    : 0;
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.name.trim() || !form.sku.trim() || !form.price) {
       alert('Please complete the product name, SKU, and selling price.');
+      return;
+    }
+
+    if (!isSuper && discountPercent > maxDiscountAllowed) {
+      alert(`Discount of ${discountPercent}% exceeds the Super Admin cap of ${maxDiscountAllowed}%. Please adjust the discount price.`);
       return;
     }
 
@@ -63,13 +81,6 @@ export const ProductEditor = ({
 
     onSave(payload);
   };
-
-  // Calculate discount percentage
-  const priceNum = parseFloat(form.price) || 0;
-  const discountNum = parseFloat(form.discountPrice) || 0;
-  const discountPercent = (priceNum > 0 && discountNum > 0 && discountNum < priceNum)
-    ? Math.round(((priceNum - discountNum) / priceNum) * 100)
-    : 0;
 
   return (
     <div>
@@ -169,14 +180,18 @@ export const ProductEditor = ({
             <h2 className="adm-card-title" style={{ marginBottom: '1rem' }}>Pricing</h2>
             <div className="adm-form-grid">
               <div className="adm-form-group">
-                <label className="adm-label">Selling / Base Price (₹) *</label>
+                <label className="adm-label">
+                  Selling / Base Price (₹) * {!allowPriceEdit && <span style={{ color: '#ef4444', fontSize: '0.75rem' }}>(Locked by Super Admin)</span>}
+                </label>
                 <input
                   type="number"
                   required
+                  disabled={!allowPriceEdit}
                   className="adm-input"
                   value={form.price}
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
                   placeholder="1899"
+                  style={{ opacity: !allowPriceEdit ? 0.6 : 1 }}
                 />
               </div>
 

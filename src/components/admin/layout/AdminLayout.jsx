@@ -15,7 +15,8 @@ export const AdminLayout = ({
   toasts = [], 
   onDismissToast,
   onExitAdmin,
-  lowStockCount = 0
+  lowStockCount = 0,
+  adminRole = 'admin'
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(() => {
     try {
@@ -83,6 +84,7 @@ export const AdminLayout = ({
         onCloseMobile={() => setIsMobileOpen(false)}
         ordersCount={orders.length}
         lowStockCount={lowStockCount}
+        adminRole={adminRole}
         onExitAdmin={onExitAdmin}
       />
 
@@ -93,6 +95,7 @@ export const AdminLayout = ({
           onOpenPalette={() => setIsPaletteOpen(true)}
           onOpenNotifications={() => setIsNotificationsOpen(true)}
           notificationCount={lowStockCount + orders.filter(o => o.status === 'Pending').length}
+          adminRole={adminRole}
           onExitAdmin={onExitAdmin}
           onNavigate={onSelectTab}
         />

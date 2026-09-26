@@ -5,7 +5,7 @@ import { AdminDashboard } from './components/admin/AdminDashboard';
 import { AdminLoginPage } from './components/admin/AdminLoginPage';
 
 const AppContent = () => {
-  const { isAdmin, setIsAdmin } = useContext(StoreContext);
+  const { isAdmin, setIsAdmin, setAdminRole } = useContext(StoreContext);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
 
   // Automatically reset admin login status if we exit the admin flow
@@ -19,7 +19,10 @@ const AppContent = () => {
     if (!isAdminAuthenticated) {
       return (
         <AdminLoginPage 
-          onLoginSuccess={() => setIsAdminAuthenticated(true)} 
+          onLoginSuccess={(role = 'admin') => {
+            if (setAdminRole) setAdminRole(role);
+            setIsAdminAuthenticated(true);
+          }} 
           onCancel={() => setIsAdmin(false)} 
         />
       );

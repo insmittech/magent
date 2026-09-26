@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Search, Bell, Moon, Sun, Menu, ChevronDown, 
-  ExternalLink, Settings as SettingsIcon, LogOut, ShieldCheck 
+  ExternalLink, Settings as SettingsIcon, LogOut, ShieldCheck, ShieldAlert, Sparkles 
 } from 'lucide-react';
 
 export const AdminTopbar = ({ 
@@ -10,12 +10,14 @@ export const AdminTopbar = ({
   onOpenPalette, 
   onOpenNotifications, 
   notificationCount = 0,
+  adminRole = 'admin',
   onExitAdmin,
   onNavigate 
 }) => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const profileRef = useRef(null);
+  const isSuper = adminRole === 'super_admin';
 
   // Check initial dark mode from body class
   useEffect(() => {
@@ -44,6 +46,7 @@ export const AdminTopbar = ({
   }, []);
 
   const pageTitles = {
+    'super-admin': 'Super Admin Master Controls',
     dashboard: 'Overview',
     orders: 'Customer Orders',
     products: 'Product Catalog',
@@ -65,7 +68,7 @@ export const AdminTopbar = ({
         </button>
 
         <div className="adm-breadcrumbs">
-          <span>Admin</span>
+          <span>{isSuper ? 'Super Admin' : 'Admin'}</span>
           <span>/</span>
           <span className="adm-breadcrumb-active">{pageTitles[activeTab] || 'Overview'}</span>
         </div>
@@ -109,18 +112,44 @@ export const AdminTopbar = ({
             className="adm-profile-btn" 
             onClick={() => setProfileOpen(!profileOpen)}
             aria-expanded={profileOpen}
+            style={{
+              borderColor: isSuper ? 'rgba(245, 158, 11, 0.4)' : undefined,
+              background: isSuper ? 'rgba(245, 158, 11, 0.08)' : undefined
+            }}
           >
-            <div className="adm-avatar">M</div>
-            <span className="adm-profile-name">Admin</span>
+            <div className="adm-avatar" style={{ background: isSuper ? '#f59e0b' : undefined }}>
+              {isSuper ? '👑' : 'M'}
+            </div>
+            <span className="adm-profile-name" style={{ color: isSuper ? '#d97706' : undefined, fontWeight: 800 }}>
+              {isSuper ? 'Super Admin' : 'Admin Staff'}
+            </span>
             <ChevronDown size={14} color="var(--adm-text-muted)" />
           </button>
 
           {profileOpen && (
             <div className="adm-profile-dropdown">
-              <div style={{ padding: '0.5rem 0.75rem', borderBottom: '1px solid var(--adm-border)' }}>
-                <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>Store Administrator</div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--adm-text-muted)' }}>admin@magnetvapi.com</div>
+              <div style={{ padding: '0.65rem 0.85rem', borderBottom: '1px solid var(--adm-border)' }}>
+                <div style={{ fontWeight: 800, fontSize: '0.88rem', color: isSuper ? '#d97706' : 'inherit' }}>
+                  {isSuper ? '👑 Master Super Admin' : 'Store Administrator'}
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--adm-text-muted)' }}>
+                  {isSuper ? 'superadmin@magnet.com' : 'admin@magnet.com'}
+                </div>
               </div>
+
+              {isSuper && (
+                <button 
+                  type="button" 
+                  className="adm-dropdown-item" 
+                  style={{ color: '#d97706', fontWeight: 700 }}
+                  onClick={() => {
+                    onNavigate('super-admin');
+                    setProfileOpen(false);
+                  }}
+                >
+                  <ShieldAlert size={14} /> Super Admin Controls
+                </button>
+              )}
 
               <button 
                 type="button" 
