@@ -4233,6 +4233,7 @@ body.dark-mode .premium-hero-3d-section {
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2; /* Standard property for future compatibility */
   -webkit-box-orient: vertical;
   overflow: hidden;
   height: 2.6rem;
