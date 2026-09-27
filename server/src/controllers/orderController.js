@@ -1,5 +1,4 @@
-import { Order } from '../models/Order.js';
-import { Product } from '../models/Product.js';
+import { prisma } from '../config/db.js';
 
 // Place Order (with server-side price security validation and stock checking)
 export const placeOrder = async (req, res, next) => {
@@ -10,29 +9,18 @@ export const placeOrder = async (req, res, next) => {
       return res.status(400).json({ message: 'Customer details and order items are required.' });
     }
 
-    const customerDetails = {
-      name: customer.name,
-      phone: customer.phone,
-      email: customer.email,
-      address: customer.address,
-      city: customer.city,
-      state: customer.state,
-      pincode: customer.pincode,
-      notes: customer.notes || ''
-    };
-
     const validatedItems = [];
     let computedTotal = 0;
 
-    // Loop and secure prices and check stock
     for (const item of items) {
-      const dbProduct = await Product.findById(item.productId);
+      const prodId = parseInt(item.productId);
+      const dbProduct = await prisma.product.findUnique({ where: { id: isNaN(prodId) ? undefined : prodId } });
       if (!dbProduct || !dbProduct.active) {
         return res.status(400).json({ message: `Product ${item.name || 'ID ' + item.productId} is unavailable.` });
       }
 
-      // Check variant stock
-      const matchedVariant = dbProduct.variants.find((v) => {
+      const variantsList = Array.isArray(dbProduct.variants) ? dbProduct.variants : [];
+      const matchedVariant = variantsList.find((v) => {
         const itemKeys = Object.keys(item.variant || {}).filter(k => k !== 'id' && k !== 'stock');
         return itemKeys.every(key => v[key] === item.variant[key]);
       });
@@ -48,7 +36,7 @@ export const placeOrder = async (req, res, next) => {
       const securePrice = dbProduct.discountPrice !== null ? dbProduct.discountPrice : dbProduct.price;
 
       validatedItems.push({
-        productId: dbProduct._id.toString(),
+        productId: dbProduct.id,
         name: dbProduct.name,
         price: securePrice,
         quantity: item.quantity,
@@ -58,10 +46,13 @@ export const placeOrder = async (req, res, next) => {
       computedTotal += securePrice * item.quantity;
     }
 
-    // Deduct stock atomically
+    // Deduct stock
     for (const item of items) {
-      const dbProduct = await Product.findById(item.productId);
-      const updatedVariants = dbProduct.variants.map((v) => {
+      const prodId = parseInt(item.productId);
+      const dbProduct = await prisma.product.findUnique({ where: { id: prodId } });
+      const variantsList = Array.isArray(dbProduct.variants) ? dbProduct.variants : [];
+
+      const updatedVariants = variantsList.map((v) => {
         const itemKeys = Object.keys(item.variant || {}).filter(k => k !== 'id' && k !== 'stock');
         const isMatch = itemKeys.every(key => v[key] === item.variant[key]);
         if (isMatch) {
@@ -70,25 +61,51 @@ export const placeOrder = async (req, res, next) => {
         return v;
       });
 
-      await Product.findByIdAndUpdate(item.productId, { variants: updatedVariants });
+      await prisma.product.update({
+        where: { id: prodId },
+        data: { variants: updatedVariants }
+      });
     }
 
     const orderCustomId = `MGT-${Math.floor(1000 + Math.random() * 9000)}`;
 
-    const newOrder = await Order.create({
-      id: orderCustomId,
-      user: req.user ? req.user._id : null,
-      customer: customerDetails,
-      items: validatedItems,
-      total: computedTotal,
-      paymentMethod: paymentMethod || 'COD',
-      paymentStatus: paymentMethod === 'Razorpay' ? 'Pending' : 'Pending',
-      status: 'Pending'
+    const newOrder = await prisma.order.create({
+      data: {
+        id: orderCustomId,
+        userId: req.user ? req.user.id : null,
+        customerName: customer.name,
+        customerPhone: customer.phone,
+        customerEmail: customer.email,
+        customerAddress: customer.address,
+        customerCity: customer.city,
+        customerState: customer.state,
+        customerPincode: customer.pincode,
+        customerNotes: customer.notes || '',
+        items: validatedItems,
+        total: computedTotal,
+        paymentMethod: paymentMethod || 'COD',
+        paymentStatus: paymentMethod === 'Razorpay' ? 'Pending' : 'Pending',
+        status: 'Pending'
+      }
     });
+
+    const responseOrder = {
+      ...newOrder,
+      customer: {
+        name: newOrder.customerName,
+        phone: newOrder.customerPhone,
+        email: newOrder.customerEmail,
+        address: newOrder.customerAddress,
+        city: newOrder.customerCity,
+        state: newOrder.customerState,
+        pincode: newOrder.customerPincode,
+        notes: newOrder.customerNotes
+      }
+    };
 
     return res.status(201).json({
       orderId: newOrder.id,
-      order: newOrder
+      order: responseOrder
     });
   } catch (error) {
     next(error);
@@ -98,12 +115,33 @@ export const placeOrder = async (req, res, next) => {
 // Customer Orders Fetch
 export const getMyOrders = async (req, res, next) => {
   try {
-    const query = req.user 
-      ? { $or: [{ user: req.user._id }, { 'customer.phone': req.user.phone }] }
-      : { 'customer.phone': req.query.phone || '' };
+    const phoneParam = req.query.phone || '';
+    const userPhone = req.user ? req.user.phone : phoneParam;
 
-    const orders = await Order.find(query).sort({ createdAt: -1 });
-    return res.json(orders);
+    const where = req.user
+      ? { OR: [{ userId: req.user.id }, { customerPhone: userPhone }] }
+      : { customerPhone: phoneParam };
+
+    const rawOrders = await prisma.order.findMany({
+      where,
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const formattedOrders = rawOrders.map(o => ({
+      ...o,
+      customer: {
+        name: o.customerName,
+        phone: o.customerPhone,
+        email: o.customerEmail,
+        address: o.customerAddress,
+        city: o.customerCity,
+        state: o.customerState,
+        pincode: o.customerPincode,
+        notes: o.customerNotes
+      }
+    }));
+
+    return res.json(formattedOrders);
   } catch (error) {
     next(error);
   }
@@ -112,8 +150,25 @@ export const getMyOrders = async (req, res, next) => {
 // Admin Orders Fetch
 export const getAdminOrders = async (req, res, next) => {
   try {
-    const orders = await Order.find().sort({ createdAt: -1 });
-    return res.json(orders);
+    const rawOrders = await prisma.order.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const formattedOrders = rawOrders.map(o => ({
+      ...o,
+      customer: {
+        name: o.customerName,
+        phone: o.customerPhone,
+        email: o.customerEmail,
+        address: o.customerAddress,
+        city: o.customerCity,
+        state: o.customerState,
+        pincode: o.customerPincode,
+        notes: o.customerNotes
+      }
+    }));
+
+    return res.json(formattedOrders);
   } catch (error) {
     next(error);
   }
@@ -129,13 +184,30 @@ export const updateOrderStatus = async (req, res, next) => {
     if (status) updates.status = status;
     if (paymentStatus) updates.paymentStatus = paymentStatus;
 
-    const order = await Order.findOneAndUpdate({ id }, updates, { new: true });
-    if (!order) {
+    const updatedOrder = await prisma.order.update({
+      where: { id },
+      data: updates
+    });
+
+    const formattedOrder = {
+      ...updatedOrder,
+      customer: {
+        name: updatedOrder.customerName,
+        phone: updatedOrder.customerPhone,
+        email: updatedOrder.customerEmail,
+        address: updatedOrder.customerAddress,
+        city: updatedOrder.customerCity,
+        state: updatedOrder.customerState,
+        pincode: updatedOrder.customerPincode,
+        notes: updatedOrder.customerNotes
+      }
+    };
+
+    return res.json(formattedOrder);
+  } catch (error) {
+    if (error.code === 'P2025') {
       return res.status(404).json({ message: 'Order not found.' });
     }
-
-    return res.json(order);
-  } catch (error) {
     next(error);
   }
 };

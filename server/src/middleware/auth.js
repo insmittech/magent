@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { User } from '../models/User.js';
+import { prisma } from '../config/db.js';
 
 export const authMiddleware = async (req, res, next) => {
   try {
@@ -9,14 +9,19 @@ export const authMiddleware = async (req, res, next) => {
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    const user = await User.findById(decoded.id).select('-password');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'magnet_secret_key');
+
+    const user = await prisma.user.findUnique({
+      where: { id: Number(decoded.id) },
+      include: { addresses: true }
+    });
+
     if (!user) {
       return res.status(401).json({ message: 'User no longer exists or session expired.' });
     }
 
-    req.user = user;
+    const { password, ...userWithoutPassword } = user;
+    req.user = userWithoutPassword;
     next();
   } catch (error) {
     console.error('Auth Middleware Error:', error.message);
@@ -29,16 +34,20 @@ export const optionalAuthMiddleware = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.split(' ')[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      
-      const user = await User.findById(decoded.id).select('-password');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'magnet_secret_key');
+
+      const user = await prisma.user.findUnique({
+        where: { id: Number(decoded.id) },
+        include: { addresses: true }
+      });
+
       if (user) {
-        req.user = user;
+        const { password, ...userWithoutPassword } = user;
+        req.user = userWithoutPassword;
       }
     }
     next();
   } catch (error) {
-    // Ignore verification errors for optional auth
     next();
   }
 };

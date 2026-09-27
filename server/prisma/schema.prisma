@@ -4,19 +4,138 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("sdb-70.hosting.stackcp.nettouch .env")
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String
+  phone     String    @unique
+  email     String    @unique
+  password  String
+  role      String    @default("customer")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  addresses Address[]
+  orders    Order[]
+  wishlist  WishlistItem[]
+}
+
+model Address {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  type      String  @default("Home")
+  address   String
+  city      String
+  state     String
+  pincode   String
+  phone     String
+  isDefault Boolean @default(false)
+}
+
+model WishlistItem {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model Category {
+  id           Int      @id @default(autoincrement())
+  name         String
+  slug         String   @unique
+  active       Boolean  @default(true)
+  image        String?
+  productCount Int      @default(0)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Product {
-  id            Int      @id @default(autoincrement())
-  name          String
-  slug          String   @unique
-  sku           String   @unique
-  description   String?  @db.Text
-  price         Decimal  @db.Decimal(10, 2)
-  discountPrice Decimal? @db.Decimal(10, 2)
-  stock         Int      @default(0)
-  active        Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                 Int      @id @default(autoincrement())
+  name               String
+  brand              String   @default("Magnet")
+  slug               String   @unique
+  sku                String   @unique
+  category           String
+  description        String   @db.Text
+  price              Float
+  discountPrice      Float?
+  image              String
+  images             Json?
+  active             Boolean  @default(true)
+  featured           Boolean  @default(false)
+  trending           Boolean  @default(false)
+  bestseller         Boolean  @default(false)
+  newArrival         Boolean  @default(false)
+  dealOfTheDay       Boolean  @default(false)
+  dealStockRemaining Int      @default(0)
+  rating             Float    @default(4.5)
+  reviewsCount       Int      @default(0)
+  variants           Json?
+  specifications     Json?
+  seoTitle           String?
+  seoDescription     String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  wishlistedBy WishlistItem[]
+}
+
+model Order {
+  id              String   @id
+  userId          Int?
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customerName    String
+  customerPhone   String
+  customerEmail   String
+  customerAddress String   @db.Text
+  customerCity    String
+  customerState   String
+  customerPincode String
+  customerNotes   String?
+  items           Json
+  total           Float
+  paymentMethod   String   @default("COD")
+  paymentStatus   String   @default("Pending")
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  razorpaySignature String?
+  status          String   @default("Pending")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Banner {
+  id        Int      @id @default(autoincrement())
+  heading   String
+  subtitle  String
+  image     String
+  ctaText   String?
+  ctaUrl    String?
+  active    Boolean  @default(true)
+  startDate String?
+  endDate   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Setting {
+  id             Int      @id @default(autoincrement())
+  storeName      String   @default("Magnet Vapi Official")
+  whatsappNumber String   @default("+919999988888")
+  address        String   @default("Shop 12, High Street Galleria, Vapi, Gujarat, 396191")
+  email          String   @default("contact@magnetstore.com")
+  announcement   String   @default("🔥 Deals of the Day: Flat 20% off on premium Graphic Tees!")
+  brandColor     String   @default("#ef4444")
+  brandFont      String   @default("Plus Jakarta Sans")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

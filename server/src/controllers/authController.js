@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken';
-import { User } from '../models/User.js';
+import bcrypt from 'bcryptjs';
+import { prisma } from '../config/db.js';
 
-// Helper to generate token
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign({ id }, process.env.JWT_SECRET || 'magnet_secret_key', { expiresIn: '7d' });
 };
 
 // Customer / Admin Register
@@ -15,43 +15,49 @@ export const register = async (req, res, next) => {
     }
 
     // Check existing
-    const existingEmail = await User.findOne({ email });
+    const existingEmail = await prisma.user.findUnique({ where: { email } });
     if (existingEmail) {
       return res.status(400).json({ message: 'Email already registered.' });
     }
 
-    const existingPhone = await User.findOne({ phone });
+    const existingPhone = await prisma.user.findUnique({ where: { phone } });
     if (existingPhone) {
       return res.status(400).json({ message: 'Phone number already registered.' });
     }
 
-    // Determine role (force admin if email is admin@magnet.com)
     let assignedRole = 'customer';
     if (email === 'admin@magnet.com' || role === 'admin') {
       assignedRole = 'admin';
     }
 
-    const user = await User.create({
-      name,
-      phone,
-      email,
-      password,
-      role: assignedRole,
-      addresses: []
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await prisma.user.create({
+      data: {
+        name,
+        phone,
+        email,
+        password: hashedPassword,
+        role: assignedRole
+      },
+      include: {
+        addresses: true,
+        wishlist: { include: { product: true } }
+      }
     });
 
-    const token = generateToken(user._id);
+    const token = generateToken(user.id);
 
     return res.status(201).json({
       token,
       user: {
-        id: user._id,
+        id: user.id,
         name: user.name,
         email: user.email,
         phone: user.phone,
         role: user.role,
-        addresses: user.addresses,
-        wishlist: user.wishlist
+        addresses: user.addresses || [],
+        wishlist: user.wishlist ? user.wishlist.map(w => w.product) : []
       }
     });
   } catch (error) {
@@ -67,28 +73,35 @@ export const login = async (req, res, next) => {
       return res.status(400).json({ message: 'Email and password are required.' });
     }
 
-    const user = await User.findOne({ email });
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: {
+        addresses: true,
+        wishlist: { include: { product: true } }
+      }
+    });
+
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
-    const token = generateToken(user._id);
+    const token = generateToken(user.id);
 
     return res.json({
       token,
       user: {
-        id: user._id,
+        id: user.id,
         name: user.name,
         email: user.email,
         phone: user.phone,
         role: user.role,
-        addresses: user.addresses,
-        wishlist: user.wishlist
+        addresses: user.addresses || [],
+        wishlist: user.wishlist ? user.wishlist.map(w => w.product) : []
       }
     });
   } catch (error) {
@@ -99,8 +112,23 @@ export const login = async (req, res, next) => {
 // Get current user profile details
 export const getMe = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id).select('-password');
-    return res.json(user);
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      include: {
+        addresses: true,
+        wishlist: { include: { product: true } }
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const { password, ...userWithoutPassword } = user;
+    return res.json({
+      ...userWithoutPassword,
+      wishlist: user.wishlist ? user.wishlist.map(w => w.product) : []
+    });
   } catch (error) {
     next(error);
   }

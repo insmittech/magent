@@ -19,7 +19,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB
+// Connect to MySQL Database via Prisma
 connectDB();
 
 // CORS configuration (allow client origins only)

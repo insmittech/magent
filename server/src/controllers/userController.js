@@ -1,10 +1,24 @@
-import { User } from '../models/User.js';
-import { Product } from '../models/Product.js';
+import { prisma } from '../config/db.js';
 
 export const getProfile = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id).populate('wishlist').select('-password');
-    return res.json(user);
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      include: {
+        addresses: true,
+        wishlist: { include: { product: true } }
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const { password, ...userWithoutPassword } = user;
+    return res.json({
+      ...userWithoutPassword,
+      wishlist: user.wishlist ? user.wishlist.map(w => w.product) : []
+    });
   } catch (error) {
     next(error);
   }
@@ -12,31 +26,51 @@ export const getProfile = async (req, res, next) => {
 
 export const saveAddress = async (req, res, next) => {
   try {
-    const address = req.body;
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ message: 'User not found.' });
+    const addressData = req.body;
+    const userId = req.user.id;
 
-    const isEdit = !!address.id;
-    let updatedAddresses = [];
+    if (addressData.isDefault) {
+      await prisma.address.updateMany({
+        where: { userId },
+        data: { isDefault: false }
+      });
+    }
 
-    if (isEdit) {
-      updatedAddresses = user.addresses.map((a) => (a._id.toString() === address.id ? { ...address, _id: address.id } : a));
+    if (addressData.id) {
+      await prisma.address.update({
+        where: { id: Number(addressData.id) },
+        data: {
+          name: addressData.name,
+          type: addressData.type || 'Home',
+          address: addressData.address,
+          city: addressData.city,
+          state: addressData.state,
+          pincode: addressData.pincode,
+          phone: addressData.phone,
+          isDefault: addressData.isDefault || false
+        }
+      });
     } else {
-      updatedAddresses = [...user.addresses, address];
+      await prisma.address.create({
+        data: {
+          userId,
+          name: addressData.name,
+          type: addressData.type || 'Home',
+          address: addressData.address,
+          city: addressData.city,
+          state: addressData.state,
+          pincode: addressData.pincode,
+          phone: addressData.phone,
+          isDefault: addressData.isDefault || false
+        }
+      });
     }
 
-    // Default overrides
-    if (address.isDefault) {
-      updatedAddresses = updatedAddresses.map((a) => ({
-        ...a,
-        isDefault: a.id === address.id || (!address.id && updatedAddresses.indexOf(a) === updatedAddresses.length - 1)
-      }));
-    }
+    const addresses = await prisma.address.findMany({
+      where: { userId }
+    });
 
-    user.addresses = updatedAddresses;
-    await user.save();
-
-    return res.json(user.addresses);
+    return res.json(addresses);
   } catch (error) {
     next(error);
   }
@@ -44,14 +78,18 @@ export const saveAddress = async (req, res, next) => {
 
 export const deleteAddress = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ message: 'User not found.' });
+    const addressId = parseInt(req.params.id);
+    const userId = req.user.id;
 
-    user.addresses = user.addresses.filter((a) => a._id.toString() !== id);
-    await user.save();
+    await prisma.address.deleteMany({
+      where: { id: addressId, userId }
+    });
 
-    return res.json(user.addresses);
+    const addresses = await prisma.address.findMany({
+      where: { userId }
+    });
+
+    return res.json(addresses);
   } catch (error) {
     next(error);
   }
@@ -59,20 +97,31 @@ export const deleteAddress = async (req, res, next) => {
 
 export const toggleWishlist = async (req, res, next) => {
   try {
-    const { productId } = req.params;
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ message: 'User not found.' });
+    const productId = parseInt(req.params.productId);
+    const userId = req.user.id;
 
-    const productIndex = user.wishlist.indexOf(productId);
-    if (productIndex > -1) {
-      user.wishlist.splice(productIndex, 1); // remove
+    const existingItem = await prisma.wishlistItem.findUnique({
+      where: {
+        userId_productId: { userId, productId }
+      }
+    });
+
+    if (existingItem) {
+      await prisma.wishlistItem.delete({
+        where: { id: existingItem.id }
+      });
     } else {
-      user.wishlist.push(productId); // add
+      await prisma.wishlistItem.create({
+        data: { userId, productId }
+      });
     }
 
-    await user.save();
-    const updatedUser = await User.findById(req.user._id).populate('wishlist');
-    return res.json(updatedUser.wishlist);
+    const wishlistItems = await prisma.wishlistItem.findMany({
+      where: { userId },
+      include: { product: true }
+    });
+
+    return res.json(wishlistItems.map(w => w.product));
   } catch (error) {
     next(error);
   }

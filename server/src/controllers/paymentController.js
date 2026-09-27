@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import razorpayInstance from '../config/razorpay.js';
-import { Order } from '../models/Order.js';
+import { prisma } from '../config/db.js';
 
 export const createRazorpayOrder = async (req, res, next) => {
   try {
@@ -8,7 +8,6 @@ export const createRazorpayOrder = async (req, res, next) => {
     if (!amount) return res.status(400).json({ message: 'Amount is required.' });
 
     if (process.env.RAZORPAY_KEY_ID === 'rzp_test_mock_id' || !process.env.RAZORPAY_KEY_ID) {
-      // Mock Sandbox Response
       return res.json({
         id: `order_mock_${Date.now()}`,
         amount: amount * 100,
@@ -18,7 +17,7 @@ export const createRazorpayOrder = async (req, res, next) => {
     }
 
     const options = {
-      amount: Math.round(amount * 100), // in paisa
+      amount: Math.round(amount * 100),
       currency: currency || 'INR',
       receipt: `receipt_${Date.now()}`
     };
@@ -39,15 +38,15 @@ export const verifyPaymentSignature = async (req, res, next) => {
     }
 
     if (process.env.RAZORPAY_KEY_ID === 'rzp_test_mock_id' || !process.env.RAZORPAY_KEY_ID) {
-      // Mock Sandbox Verification Success
-      const updatedOrder = await Order.findOneAndUpdate(
-        { id: orderId },
-        { 
-          paymentStatus: 'Paid', 
-          paymentDetails: { razorpayOrderId, razorpayPaymentId, razorpaySignature } 
-        },
-        { new: true }
-      );
+      const updatedOrder = await prisma.order.update({
+        where: { id: orderId },
+        data: {
+          paymentStatus: 'Paid',
+          razorpayOrderId,
+          razorpayPaymentId,
+          razorpaySignature
+        }
+      });
       return res.json({ status: 'success', order: updatedOrder });
     }
 
@@ -58,14 +57,15 @@ export const verifyPaymentSignature = async (req, res, next) => {
       .digest('hex');
 
     if (generatedSignature === razorpaySignature) {
-      const updatedOrder = await Order.findOneAndUpdate(
-        { id: orderId },
-        { 
-          paymentStatus: 'Paid', 
-          paymentDetails: { razorpayOrderId, razorpayPaymentId, razorpaySignature } 
-        },
-        { new: true }
-      );
+      const updatedOrder = await prisma.order.update({
+        where: { id: orderId },
+        data: {
+          paymentStatus: 'Paid',
+          razorpayOrderId,
+          razorpayPaymentId,
+          razorpaySignature
+        }
+      });
       return res.json({ status: 'success', order: updatedOrder });
     } else {
       return res.status(400).json({ message: 'Invalid payment signature. Verification failed.' });

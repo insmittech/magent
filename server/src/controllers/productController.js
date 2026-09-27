@@ -1,11 +1,10 @@
-import { Product } from '../models/Product.js';
+import { prisma } from '../config/db.js';
 import cloudinary from '../config/cloudinary.js';
 
 // Helper to stream upload file to Cloudinary
 const uploadToCloudinary = (fileBuffer) => {
   return new Promise((resolve, reject) => {
     if (process.env.CLOUDINARY_CLOUD_NAME === 'mock_cloudinary' || !process.env.CLOUDINARY_CLOUD_NAME) {
-      // Local dev mock fallback
       console.log('Using mock Cloudinary fallback URL');
       return resolve('/images/clothing.jpg');
     }
@@ -24,24 +23,27 @@ const uploadToCloudinary = (fileBuffer) => {
 export const getProducts = async (req, res, next) => {
   try {
     const { category, search, activeOnly } = req.query;
-    const query = {};
+    const where = {};
 
     if (activeOnly !== 'false') {
-      query.active = true;
+      where.active = true;
     }
     if (category && category !== 'all') {
-      query.category = category;
+      where.category = category;
     }
     if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { brand: { $regex: search, $options: 'i' } },
-        { sku: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
+      where.OR = [
+        { name: { contains: search } },
+        { brand: { contains: search } },
+        { sku: { contains: search } },
+        { description: { contains: search } }
       ];
     }
 
-    const products = await Product.find(query).sort({ createdAt: -1 });
+    const products = await prisma.product.findMany({
+      where,
+      orderBy: { createdAt: 'desc' }
+    });
     return res.json(products);
   } catch (error) {
     next(error);
@@ -51,7 +53,10 @@ export const getProducts = async (req, res, next) => {
 // Get product details
 export const getProductById = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const productId = parseInt(req.params.id);
+    const product = await prisma.product.findUnique({
+      where: { id: isNaN(productId) ? undefined : productId }
+    });
     if (!product) {
       return res.status(404).json({ message: 'Product not found.' });
     }
@@ -77,34 +82,34 @@ export const createProduct = async (req, res, next) => {
       imageUrl = req.body.image;
     }
 
-    // Slug generation
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-    // Parse nested objects if sent as stringified JSON (from multipart/form-data)
     const parsedVariants = typeof variants === 'string' ? JSON.parse(variants) : (variants || []);
     const parsedSpecs = typeof specifications === 'string' ? JSON.parse(specifications) : (specifications || []);
 
-    const product = await Product.create({
-      name,
-      brand: brand || 'Magnet',
-      slug,
-      sku,
-      category,
-      description: description || '',
-      price: parseFloat(price),
-      discountPrice: discountPrice ? parseFloat(discountPrice) : null,
-      image: imageUrl,
-      active: active === 'false' ? false : true,
-      featured: featured === 'true',
-      trending: trending === 'true',
-      bestseller: bestseller === 'true',
-      newArrival: newArrival === 'true',
-      dealOfTheDay: dealOfTheDay === 'true',
-      dealStockRemaining: dealStockRemaining ? parseInt(dealStockRemaining) : 0,
-      variants: parsedVariants,
-      specifications: parsedSpecs,
-      seoTitle: seoTitle || name,
-      seoDescription: seoDescription || description || ''
+    const product = await prisma.product.create({
+      data: {
+        name,
+        brand: brand || 'Magnet',
+        slug,
+        sku,
+        category,
+        description: description || '',
+        price: parseFloat(price),
+        discountPrice: discountPrice ? parseFloat(discountPrice) : null,
+        image: imageUrl,
+        active: active === 'false' ? false : true,
+        featured: featured === 'true' || featured === true,
+        trending: trending === 'true' || trending === true,
+        bestseller: bestseller === 'true' || bestseller === true,
+        newArrival: newArrival === 'true' || newArrival === true,
+        dealOfTheDay: dealOfTheDay === 'true' || dealOfTheDay === true,
+        dealStockRemaining: dealStockRemaining ? parseInt(dealStockRemaining) : 0,
+        variants: parsedVariants,
+        specifications: parsedSpecs,
+        seoTitle: seoTitle || name,
+        seoDescription: seoDescription || description || ''
+      }
     });
 
     return res.status(201).json(product);
@@ -116,10 +121,10 @@ export const createProduct = async (req, res, next) => {
 // Update product (Admin)
 export const updateProduct = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const productId = parseInt(req.params.id);
     let updates = { ...req.body };
 
-    const product = await Product.findById(id);
+    const product = await prisma.product.findUnique({ where: { id: productId } });
     if (!product) {
       return res.status(404).json({ message: 'Product not found.' });
     }
@@ -134,15 +139,25 @@ export const updateProduct = async (req, res, next) => {
     }
     if (updates.dealStockRemaining) updates.dealStockRemaining = parseInt(updates.dealStockRemaining);
 
-    // Parsing nested forms
     if (typeof updates.variants === 'string') updates.variants = JSON.parse(updates.variants);
     if (typeof updates.specifications === 'string') updates.specifications = JSON.parse(updates.specifications);
+
+    if (updates.active !== undefined) updates.active = updates.active === 'true' || updates.active === true;
+    if (updates.featured !== undefined) updates.featured = updates.featured === 'true' || updates.featured === true;
+    if (updates.trending !== undefined) updates.trending = updates.trending === 'true' || updates.trending === true;
+    if (updates.bestseller !== undefined) updates.bestseller = updates.bestseller === 'true' || updates.bestseller === true;
+    if (updates.newArrival !== undefined) updates.newArrival = updates.newArrival === 'true' || updates.newArrival === true;
+    if (updates.dealOfTheDay !== undefined) updates.dealOfTheDay = updates.dealOfTheDay === 'true' || updates.dealOfTheDay === true;
 
     if (updates.name && updates.name !== product.name) {
       updates.slug = updates.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     }
 
-    const updatedProduct = await Product.findByIdAndUpdate(id, updates, { new: true });
+    const updatedProduct = await prisma.product.update({
+      where: { id: productId },
+      data: updates
+    });
+
     return res.json(updatedProduct);
   } catch (error) {
     next(error);
@@ -152,13 +167,17 @@ export const updateProduct = async (req, res, next) => {
 // Delete product (Admin)
 export const deleteProduct = async (req, res, next) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found.' });
-    }
+    const productId = parseInt(req.params.id);
+    const product = await prisma.product.delete({
+      where: { id: productId }
+    });
     return res.json({ message: 'Product deleted successfully.' });
   } catch (error) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ message: 'Product not found.' });
+    }
     next(error);
   }
 };
+
 export { uploadToCloudinary };

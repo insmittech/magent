@@ -1,10 +1,10 @@
-import { Setting } from '../models/Setting.js';
+import { prisma } from '../config/db.js';
 
 export const getSettings = async (req, res, next) => {
   try {
-    let settings = await Setting.findOne();
+    let settings = await prisma.setting.findFirst();
     if (!settings) {
-      settings = await Setting.create({});
+      settings = await prisma.setting.create({ data: {} });
     }
     return res.json(settings);
   } catch (error) {
@@ -14,11 +14,14 @@ export const getSettings = async (req, res, next) => {
 
 export const updateSettings = async (req, res, next) => {
   try {
-    let settings = await Setting.findOne();
+    let settings = await prisma.setting.findFirst();
     if (!settings) {
-      settings = await Setting.create(req.body);
+      settings = await prisma.setting.create({ data: req.body });
     } else {
-      settings = await Setting.findByIdAndUpdate(settings._id, req.body, { new: true });
+      settings = await prisma.setting.update({
+        where: { id: settings.id },
+        data: req.body
+      });
     }
     return res.json(settings);
   } catch (error) {
